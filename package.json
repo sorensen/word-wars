@@ -1,0 +1,19 @@
+{
+  "name": "nko3-candy-wars",
+  "version": "0.0.0",
+  "description": "Words",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:nko3/candy-wars.git"
+  },
+  "dependencies": {
+  },
+  "engines": {
+    "node": "0.8.x"
+  },
+  "subdomain": "candy-wars.nko3"
+}
