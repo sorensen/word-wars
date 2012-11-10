@@ -15,28 +15,66 @@
     , playerTwo = 'blue-player'
     , imgPath = '/img/digits.png'
 
+  // Helpers
+  // =======
+
+  function uuid(a) {
+    return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,b)
+  }
 
   // Game Lobby
   // ==========
 
   function Lobby(socket) {
     var self = this
+
+    window.sock = socket
     this.$wrapper = $('#wrapper')
+    this.$home = $('#home')
+    this.$lobby = $('#lobby-mode')
+
+    this.$home.click(function() {
+      self.home()
+    })
+    this.$lobby.on('click', '.join', function(e) {
+      console.log('join: ', e, this)
+
+      var $el = $(this)
+        , id = $el.parent().attr('data-id')
+
+      console.log('id', id)
+      self.join(id)
+    })
+
+
     this.socket = socket
     this.socket.on('connect', function() { 
       self.connect() 
     })
   }
+  // Home screen
+  Lobby.prototype.home = function() {
+    this.leave()
+  }
   // Socket connection handler
   Lobby.prototype.connect = function() {
+    var self = this
+
+    this.socket.emit('getGames', function(rooms) {
+      console.log('rooms: ', rooms)
+
+      for (var key in rooms) {
+        self.render(key, rooms[key])
+      }
+    })
     return this
   }
   Lobby.prototype.games = function() {
     return this
   }
   // Join a game
-  Lobby.prototype.join = function() {
-    this.game = new Game(this.socket).connect()
+  Lobby.prototype.join = function(id) {
+    this.game = new Game(this.socket, id).connect()
     this.$wrapper
       .removeClass('lobby')
       .addClass('battle')
@@ -44,15 +82,30 @@
   }
   // Leave the game
   Lobby.prototype.leave = function() {
-    this.game.quit()
+    this.game && this.game.quit()
+    this.game = null
     this.$wrapper
       .removeClass('battle')
       .addClass('lobby')
     return this
   }
   // Render all rooms
-  Lobby.prototype.render = function() {
+  Lobby.prototype.render = function(id, room) {
+    var $el = this.$lobby.find('[data-id="' + id + '"]')
 
+    // If the room does not exist, create it
+    if (!$el || !$el.length) {
+      $el = $(''
+        + '<div class="game" data-id="' + id + '">'
+        + '  <button class="join btn btn-info btn-small">Join</button>'
+        + '  <div class="host"><span>Host:</span> Some Host</div>'
+        + '  <div class="blue-player"><span>Player:</span> Player 1</div>'
+        + '  <div class="watchers"><span>Watchers:</span> 5</div>'
+        + '  <div class="words"><span>Words:</span> 80</div>'
+        + '</div>'
+      )
+      this.$lobby.append($el)
+    }
   }
   // Refresh all games in the view
   Lobby.prototype.refresh = function() {
@@ -63,10 +116,12 @@
   // Game Engine
   // ===========
 
-  function Game(socket) {
+  function Game(socket, id) {
     var self = this
 
     this.socket = socket
+    this.id = id
+    this.listeners = []
     this.$input = $('#input')
     this.$player = $('#' + playerOne)
     this.$opponent = $('#' + playerTwo)
@@ -107,10 +162,19 @@
 
     this.playerId = this.socket.socket.sessionid
 
-    this.send('join', 'test', function (e) {
+    this.send('join', this.id, function(e) {
       console.log(e)
     })
-
+    this.listeners = [
+      'used'
+    , 'attack'
+    , 'block'
+    , 'lose'
+    , 'win'
+    , 'start'
+    , 'over'
+    ]
+    // this.socket.on('used', function() { self.usedWord.apply(self, arguments) })
     this.socket.on('used', this.usedWord.bind(this))
     this.socket.on('attack', this.attacked.bind(this))
     //this.socket.on('players', this.players.bind(this))
@@ -132,7 +196,6 @@
     return this
   }
   Game.prototype.players = function() {
-
     return this
   }
   Game.prototype.usedWord = function() {
@@ -243,7 +306,9 @@
 
   // Player has quit the game
   Game.prototype.quit = function() {
-    this.socket.off()
+    for (var i = 0; i !== this.listeners.length; i++) {
+      this.socket.removeListener(this.listeners[i])
+    }
     return this.reset()
   }
 

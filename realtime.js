@@ -1,3 +1,4 @@
+
 var dictionary = require('./dictionary')
   , app, io, db
 
@@ -9,6 +10,12 @@ module.exports = function (app) {
 
 function ioMain(socket) {
   var session = socket.handshake.session
+
+  console.log('rooms: ', io.sockets.manager.roomClients)
+
+  socket.on('getGames', function (cb) {
+    cb(io.sockets.manager.roomClients)
+  })
 
   socket.on('join', function (room, cb) {
     var clients = io.sockets.clients(room)
