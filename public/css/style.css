@@ -258,6 +258,12 @@ html, body {
   background: #ADB9BD;
   border-top: 1px solid #676767;
 }
+.page {
+  -webkit-transition: all 1.8s ease-in-out;
+  -moz-transition: all 1.8s ease-in-out;
+  -o-transition: all 1.8s ease-in-out;
+  transition: all 1.8s ease-in-out;
+}
 
 /* =============================================================================
    Game
@@ -398,7 +404,7 @@ html, body {
    ========================================================================== */
 
 .game {
-  padding: 20px 0 0 20px;
+  padding: 5px;
   position: relative;
   min-width: 200px;
   min-height: 100px;
@@ -416,22 +422,26 @@ html, body {
   background-image: -o-linear-gradient(top, #cccccc, #aaaaaa);
   background-image: linear-gradient(to bottom, #cccccc, #aaaaaa);
 }
+  .game .btn {
+    float: left;
+    margin-right: 5px;
+  }
+  /*
   .game .join {
-    margin: 3px 0 0 3px;
-    position: absolute;
     left: 3px;
-    top: 3px;
   }
+  .game .watch {
+    right: 3px;
+  }
+  */
   .game div {
-    margin-left: 10px;
   }
-  .game div span {
+  .game div strong {
     font-size: 11px;
     font-weight: bold;
     text-transform: uppercase;
-    width: 70px;
+    width: 90px;
     display: inline-block;
-    text-align: right;
   }
 
 /* =============================================================================

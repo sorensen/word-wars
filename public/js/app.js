@@ -28,25 +28,22 @@
   function Lobby(socket) {
     var self = this
 
-    window.sock = socket
+    this.game = null
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
     this.$lobby = $('#lobby-mode')
 
-    this.$home.click(function() {
-      self.home()
+    $win.unload(function() {
+      self.game && self.game.quit()
     })
+    this.$home.click(function() { self.home() })
+
     this.$lobby.on('click', '.join', function(e) {
-      console.log('join: ', e, this)
-
       var $el = $(this)
-        , id = $el.parent().attr('data-id')
+        , id = $el.parent().data('id')
 
-      console.log('id', id)
       self.join(id)
     })
-
-
     this.socket = socket
     this.socket.on('connect', function() { 
       self.connect() 
@@ -98,14 +95,30 @@
       $el = $(''
         + '<div class="game" data-id="' + id + '">'
         + '  <button class="join btn btn-info btn-small">Join</button>'
-        + '  <div class="host"><span>Host:</span> Some Host</div>'
-        + '  <div class="blue-player"><span>Player:</span> Player 1</div>'
-        + '  <div class="watchers"><span>Watchers:</span> 5</div>'
-        + '  <div class="words"><span>Words:</span> 80</div>'
+        + '  <button class="watch btn btn btn-small">Watch</button>'
+        + '  <div class="clearfix"></div>'
+        + '  <div class="host"><strong>Host:</strong> <span>Some Host</span></div>'
+        + '  <div class="red-player"><strong>Red Player:</strong> <span>Player 1</span></div>'
+        + '  <div class="blue-player"><strong>Blue Player:</strong> <span>Player 2</span></div>'
+        + '  <div class="watchers"><strong>Watchers:</strong> <span>5</span></div>'
+        + '  <div class="words"><strong>Words:</strong> <span>80</span></div>'
         + '</div>'
       )
       this.$lobby.append($el)
+    } else {
+      this.update($el, room)
     }
+  }
+  // Update room information
+  Lobby.prototype.update = function($el, room) {
+    $el
+      .find('.join').end()
+      .find('.host span').html().end()
+      .find('.blue-player span').html().end()
+      .find('.red-player span').html().end()
+      .find('.watchers span').html().end()
+      .find('.words span').html().end()
+    return this
   }
   // Refresh all games in the view
   Lobby.prototype.refresh = function() {
@@ -160,6 +173,9 @@
   Game.prototype.connect = function() {
     var self = this
 
+    if (this.connected) {
+      return this
+    }
     this.playerId = this.socket.socket.sessionid
     this.listeners = [
       'used'
@@ -178,21 +194,23 @@
     this.socket.on('lose', function () { self.lost.apply(self, arguments) })
     this.socket.on('win', function () { self.won.apply(self, arguments) })
     this.socket.on('start', function () { self.start.apply(self, arguments) })
-    this.socket.on('over', function () { self.over.apply(self, arguments) 
+    this.socket.on('over', function () { self.over.apply(self, arguments) })
 
+    console.log('connect')
     this.send('join', this.id, function(e) {
       console.log(e)
     })
+    this.connected = true
     return this
   }
-  Game.prototype.send = function(action, word, fn) {
+  Game.prototype.send = function() {
     var self = this
     console.log('send: ', arguments)
-    this.socket.emit(action, word, function() {
-      console.log('socket done: ', arguments)
-      fn && fn.apply(this, arguments)
-    })
-    // this.socket.emit.apply(this.socket, arguments)
+    // this.socket.emit(action, word, function() {
+    //   console.log('socket done: ', arguments)
+    //   fn && fn.apply(this, arguments)
+    // })
+    this.socket.emit.apply(this.socket, arguments)
     return this
   }
   Game.prototype.players = function() {
@@ -207,7 +225,6 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
-    console.log('attacked: ', arguments)
     word = word.toLowerCase().trim()
 
     var me = id === this.playerId
@@ -239,7 +256,7 @@
       .animate({
         top: top * 10 + '%'
       }, timeout, 'linear', function() {
-        console.log('done')
+
       })
   }
   Game.prototype.blocked = function(word, id) {
@@ -272,6 +289,7 @@
       , digitWidth: 53
       , digitHeight: 77
       , timerEnd: function() { 
+          console.log('start game')
           self.$counter
             .html('')
             .hide()
@@ -283,6 +301,7 @@
   }
   Game.prototype.enableInput = function() {
     this.enabled = true
+    console.log('enable input')
     this.$input.removeAttr('disabled').focus()
     return this
   }
@@ -306,10 +325,13 @@
 
   // Player has quit the game
   Game.prototype.quit = function() {
+    var self = this
     this.send('leave', this.id, function(e) {
-      for (var i = 0; i !== this.listeners.length; i++) {
-        this.socket.removeListener(this.listeners[i])
+      for (var i = 0; i !== self.listeners.length; i++) {
+        console.log('remove listener: ', self.listeners[i])
+        self.socket.removeAllListeners(self.listeners[i])
       }
+      self.connected = false
     })
     return this.reset()
   }
@@ -361,7 +383,9 @@
     var self = this
 
     this.send('attack', word, function (err) {
-      if (err) return console.log(err)
+      if (err) {
+        return self.notify(err)
+      }
     })
     return this
   }
@@ -379,14 +403,7 @@
   }
 
   $(function() {
-    //window.game = new Game()
     window.lobby = new Lobby(io.connect())
-
-    $('#lobby-mode').on('click', '.join', function (e) {
-      var room = $(this).data('room')
-      window.lobby.join(room)
-    })
   })
-
 
 }).call(this)
