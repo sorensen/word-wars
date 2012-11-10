@@ -252,6 +252,7 @@ html, body {
     left: auto;
   }
   .board div {
+    top: 0;
     clear: both;
     height: 9%;
     line-height: 1;
@@ -259,6 +260,11 @@ html, body {
     display: table;
     width: 100%;
     position: absolute;
+
+    -webkit-transition: all 1.3s linear;
+    -moz-transition: all 1.3s linear;
+    -o-transition: all 1.3s linear;
+    transition: all 1.3s linear;
   }
   .board div p {
     display: table-cell;
