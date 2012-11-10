@@ -8,6 +8,16 @@ module.exports = function (app) {
   io.sockets.on('connection', ioMain)
 }
 
+function getRoom(socket) {
+  var rooms = io.sockets.manager.roomClients[socket.id]
+    , room = Object.keys(rooms)[1]
+
+  if (room) {
+    return room.slice(1)
+  }
+  return null
+}
+
 function ioMain(socket) {
   var session = socket.handshake.session
 
@@ -31,6 +41,19 @@ function ioMain(socket) {
     socket.join(room)
     io.sockets.in(room).emit('join', socket.id)
     if (clients.length === 1) io.sockets.in(room).emit('start')
+  })
+
+  socket.on('sit', function (roomId, seat, playerId) {
+    var room = getRoom(socket)
+    if (room) {
+      io.sockets.in(room).emit('sat', seat, playerId)
+    }
+  })
+  socket.on('stand', function (roomId, seat, playerId) {
+    var room = getRoom(socket)
+    if (room) {
+      io.sockets.in(room).emit('stood', seat, playerId)
+    }
   })
 
   socket.on('leave', function (room, cb) {

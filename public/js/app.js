@@ -212,6 +212,9 @@
     this.socket.on('start', function () { self.start.apply(self, arguments) })
     this.socket.on('over', function () { self.over.apply(self, arguments) })
 
+    this.socket.on('sat', function () { self.sat.apply(self, arguments) })
+    this.socket.on('stood', function () { self.stood.apply(self, arguments) })
+
     console.log('connect')
     this.send('join', this.id, function(e) {
       console.log(e)
@@ -342,7 +345,7 @@
   // Player has quit the game
   Game.prototype.quit = function() {
     var self = this
-    this.send('leave', this.id, function(e) {\
+    this.send('leave', this.id, function(e) {
       for (var i = 0; i !== self.listeners.length; i++) {
         self.socket.removeAllListeners(self.listeners[i])
       }
@@ -377,6 +380,9 @@
   // ------------
 
   Game.prototype.sit = function(el, e) {
+    if (this.isSitting) {
+      return this
+    }
     var self = this
       , $el = $(el)
       , seat = this.getSeat($el.data('player'))
@@ -392,6 +398,9 @@
     return this
   }
   Game.prototype.stand = function() {
+    if (!this.isSitting) {
+      return this
+    }
     var self = this
       , pid = this.pid
       , red = this.red
@@ -409,15 +418,16 @@
     return this
   }
   Game.prototype.updateSeats = function() {
+    var self = this
     ;['red'
     , 'blue'
     ].forEach(function(player) {
-      if (this[player]) {
-        this['$' + player + 'Seat']
+      if (self[player]) {
+        self['$' + player + 'Seat']
           .attr('disabled', 'disabled')
           .html('<i class="icon icon-user"></i>')
       } else {
-        this['$' + player + 'Seat']
+        self['$' + player + 'Seat']
           .removeAttr('disabled')
           .html('Sit')
       }
