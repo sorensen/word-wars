@@ -1,4 +1,282 @@
 
 /* =============================================================================
+   Colors
+   ========================================================================== 
+
+  Blues - #0099CC
+  ---------------
+
+  #000F14
+  #001F29
+  #007AA3
+  #0099CC
+  #4DB8DB
+  #66C2E0
+
+*/
+
+/* =============================================================================
+   Overrides
+   ========================================================================== */
+
+[class^="icon-"], [class*=" icon-"] {
+  background-image: none !important;
+}
+a:hover .icon {
+  text-decoration: none;
+}
+.accordion-group {
+  border: 0;
+  border-radius: 0;
+}
+
+
+/* =============================================================================
+   Fonts
+   ========================================================================== */
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('/font/fontawesome-webfont.eot');
+  src: url('/font/fontawesome-webfont.eot?#iefix') format('embedded-opentype'),
+     url('/font/fontawesome-webfont.woff') format('woff'),
+     url('/font/fontawesome-webfont.ttf') format('truetype'),
+     url('/font/fontawesome-webfont.svg#FontAwesome') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+/* =============================================================================
+   General
+   ========================================================================== */
+
+input:focus, textarea:focus, isindex:focus, keygen:focus, select:focus {
+  outline-offset: -2px;
+}
+body, input, button, textarea, select {
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+#wrapper .box {
+  position: relative;
+  background: #0099CC;
+  padding: 10px;
+  color: #001F29;
+  line-height: 1;
+}
+
+/* =============================================================================
    Layout
    ========================================================================== */
+
+html, body {
+  margin: 0;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+}
+#wrapper, #header, #footer, #inner, #top, #bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+#wrapper {
+  top: 0;
+  bottom: 0;
+}
+.color-strip {
+  height: 5px;
+}
+  .color-strip div {
+    height: 5px;
+    width: 25%;
+    float: left;
+  }
+  .color-1 { background: #007AA3; }
+  .color-2 { background: #66C2E0; }
+  .color-3 { background: #0099CC; }
+  .color-4 { background: #4DB8DB; }
+
+#top {
+  top: 0;
+}
+#bottom {
+  bottom: 0;
+}
+#header {
+  top: 5px;
+  height: 40px;
+}
+  #logo, #spacer {
+  }
+  #logo {
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  #spacer {
+    margin: 4px auto 0;
+    width: 600px;
+    height: 2px;
+    background-color:#ffffff;
+    filter:progid:DXImageTransform.Microsoft.gradient(GradientType=1,startColorstr=#ffffff, endColorstr=#007AA3);
+    background-image:-moz-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
+    background-image:linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
+    background-image:-webkit-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
+    background-image:-o-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
+    background-image:-ms-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
+    background-image:-webkit-gradient(linear, left bottom, right bottom, color-stop(0%,#ffffff), color-stop(50%,#007AA3),color-stop(100%,#ffffff));
+  }
+
+#inner {
+  top: 60px;
+  bottom: 25px;
+  bottom: 65px;
+  overflow-y: scroll;
+}
+  .sidebar {
+    width: 21%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0 2%;
+  }
+    .sidebar .icon {
+      position: absolute;
+      font-size: 33px;
+      width: 33px;
+      height: 33px;
+      line-height: 1;
+      left: 12px;
+      top: 50%;
+      margin-top: -16px;
+    }
+    .sidebar .accordion-toggle {
+      line-height: 2 !important;
+      padding-left: 45px !important;
+    }
+    #wrapper .sidebar .accordion-toggle:hover {
+      background: #001F29;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .sidebar .accordion-toggle:hover .icon {
+      color: #ffffff;
+    }
+    #right {
+      left: 75%;
+    }
+      #right .accordion-toggle {
+        padding-right: 45px !important;
+      }
+
+  #game {
+    width: 50%;
+    position: absolute;
+    left: 50%;
+    margin-left: -25%;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+  }
+  .board {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 49.5%;
+    border-radius: 3px;
+    background-color: #dddddd;
+    background-image: -webkit-gradient(linear, top, bottom, from(#dddddd), to(#ffffff));
+    background-image: -webkit-linear-gradient(top, #dddddd, #ffffff);
+    background-image: -moz-linear-gradient(top, #dddddd, #ffffff);
+    background-image: -o-linear-gradient(top, #dddddd, #ffffff);
+    background-image: linear-gradient(to bottom, #dddddd, #ffffff);
+  }
+  .board + .board {
+    margin-left: 1%;
+    right: 0;
+    left: auto;
+  }
+  .board div {
+    clear: both;
+    font-size: 25px;
+    height: 9%;
+    line-height: 1;
+    text-align: center;
+    display: table;
+    width: 100%;
+    position: relative;
+  }
+  .board div p {
+    display: table-cell;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+  display: table-cell; 
+  vertical-align: middle; 
+  text-align: center; 
+  }
+  .board div + div {
+    /*border-top: 1px solid #ccc;*/
+  }
+
+  #input-wrapper {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
+  #input {
+    width: 100%;
+  }
+
+#menu {
+  text-align: center;
+  position: absolute;
+  height: 65px;
+  bottom: 25px;
+  bottom: 0;
+  width: 400px;
+  left: 50%;
+  margin-left: -200px;
+  font-size: 45px;
+  z-index: 3;
+}
+  #menu a {
+    width: 45px;
+    height: 45px;
+    display: inline-block;
+    margin: 0;
+  }
+  #menu a:hover {
+    color: #003D52;
+  }
+  #menu a + a {
+    margin-left: 5px;
+  }
+  #menu a:hover {
+    margin-top: 0;
+    cursor: pointer;
+    text-decoration: none;
+  }
+#footer {
+  height: 24px;
+  bottom: 0;
+  background: #ADB9BD;
+  border-top: 1px solid #676767;
+}

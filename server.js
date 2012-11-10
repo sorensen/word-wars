@@ -1,7 +1,29 @@
-var http = require('http');
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World\n');
-}).listen(8000);
 
-console.log('Server running at http://0.0.0.0:8000/');
+var express = require('express')
+  , ejs = require('ejs')
+  , app = express()
+  , port = 8000
+
+
+app.configure(function() {
+  app.use(express.static(__dirname + '/public'))
+  app.use(express.bodyParser())
+  app.use(express.cookieParser())
+  app.use(express.methodOverride())
+  app.set('views', __dirname + '/views')
+  app.use(express.errorHandler({ 
+    dumpExceptions: true
+  , showStack: true
+  }))
+  app.use(app.router)
+  app.engine('html', ejs.renderFile);
+})
+
+app.get('/', function(req, res) {
+  res.render('index.html')
+})
+
+
+app.listen(port, function() {
+  console.log('app started')
+})
