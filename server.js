@@ -1,29 +1,16 @@
-
 var express = require('express')
-  , ejs = require('ejs')
-  , app = express()
-  , port = 8000
+  , app     = express()
+  , http    = require('http')
+  , server  = http.createServer(app)
 
+app.set('server', server)
 
-app.configure(function() {
-  app.use(express.static(__dirname + '/public'))
-  app.use(express.bodyParser())
-  app.use(express.cookieParser())
-  app.use(express.methodOverride())
-  app.set('views', __dirname + '/views')
-  app.use(express.errorHandler({ 
-    dumpExceptions: true
-  , showStack: true
-  }))
-  app.use(app.router)
-  app.engine('html', ejs.renderFile);
-})
+require('./config')(app)
 
-app.get('/', function(req, res) {
-  res.render('index.html')
-})
+require('./routes')(app)
 
+require('./realtime')(app)
 
-app.listen(port, function() {
-  console.log('app started')
+server.listen(app.settings.port, function () {
+  console.log('Express server started on port: ' + app.settings.port)
 })
