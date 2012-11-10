@@ -382,7 +382,7 @@
       , seat
 
     Object.keys(this.seats).forEach(function (key) {
-      if (self.seats[seat] === playerId) seat = key
+      if (self.seats[key] === playerId) seat = key
     })
     
     return seat

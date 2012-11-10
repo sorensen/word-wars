@@ -65,6 +65,7 @@ function ioMain(socket) {
       if (res === 0) return cb('You are already sitting')
 
       io.sockets.in(room).emit('sat', socket.id, first ? 'red' : 'blue')
+      if (!first) startGame(room)
       cb()
     }
   })
@@ -184,9 +185,19 @@ function stand(room, socket, cb) {
   }
 }
 
+function startGame(room) {
+  io.sockets.in(room).emit('start')
+}
+
+function endGame(room) {
+  io.sockets.in(room).emit('over')
+}
+
 function clearRoom(room) {
   var multi = db.multi()
   multi.del([room, 'currentwords'].join(':'))
   multi.del([room, 'playedwords'].join(':'))
-  multi.exec()
+  multi.exec(function () {
+    endGame(room)
+  })
 }
