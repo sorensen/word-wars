@@ -68,7 +68,7 @@ function ioMain(socket) {
 
       var multi = db.multi()
       others.forEach(function (client) {
-        multi.sadd([room, 'currentwords'].join(':'), socket.id + word)
+        multi.sadd([room, 'currentwords'].join(':'), client.id + word)
       })
       multi.exec(function (err) {
         io.sockets.in(room).emit('attack', word, socket.id)

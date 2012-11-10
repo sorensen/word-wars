@@ -36,7 +36,7 @@
     // Attack and clear input if enter pressed
     this.$input.keypress(function(e) {
       if (e.which === ENTER) {
-        self.attacked(self.$input.val())
+        self.attack(self.$input.val())
         self.$input.val('')
       }
     })
@@ -68,14 +68,18 @@
 
     this.playerId = this.socket.socket.sessionid
 
-    this.socket.on('used', this.usedWord)
-    this.socket.on('attack', this.attack)
-    this.socket.on('players', this.players)
-    this.socket.on('block', this.blocked)
-    this.socket.on('lose', this.lost)
-    this.socket.on('win', this.won)
-    this.socket.on('start', this.start)
-    this.socket.on('over', this.over)
+    this.send('join', 'test', function (e) {
+      console.log(e)
+    })
+
+    this.socket.on('used', this.usedWord.bind(this))
+    this.socket.on('attack', this.attacked.bind(this))
+    //this.socket.on('players', this.players.bind(this))
+    this.socket.on('block', this.blocked.bind(this))
+    this.socket.on('lose', this.lost.bind(this))
+    this.socket.on('win', this.won.bind(this))
+    this.socket.on('start', this.start.bind(this))
+    this.socket.on('over', this.over.bind(this))
     return this
   }
   Game.prototype.send = function() {
@@ -95,17 +99,24 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
-    var me = id === this.playerId
-      , word = word.toLowerCase().trim()
-      , $el = me ? this.$player : this.$opponent
+    word = word.toLowerCase().trim()
 
-    this.animate($el, word)
+    var me = id === this.playerId
+      , $el = me ? this.$opponent : this.$player
+      , $word = $('<div><p>' + word + '</p></div>')
+
+    if (me) {
+      this.opponentWords[word] = $word
+    } else {
+      this.playerWords[word] = $word
+    }
+
+    this.animate($el, $word)
   }
-  Game.prototype.animate = function($el, word) {
+  Game.prototype.animate = function($el, $word) {
     var height = $el.height()
       , ten = height / 10
       , idx = $el.children().length
-      , $word = $('<div><p>' + word + '</p></div>')
 
     this.word($word, idx)
     $el.prepend($word)
@@ -123,7 +134,19 @@
         console.log('done')
       })
   }
-  Game.prototype.blocked = function() {
+  Game.prototype.blocked = function(word, id) {
+    var me = id === this.playerId
+
+    word = word.toLowerCase().trim()
+
+    console.log(word, me, this.playerWords)
+    if (me) {
+      this.playerWords[word].remove()
+      delete this.playerWords[word]
+    } else {
+      this.opponentWords[word].remove()
+      delete this.opponentWords[word]
+    }
 
     return this
   }
@@ -192,8 +215,12 @@
     })
     return this
   }
-  Game.prototype.attack = function() {
+  Game.prototype.attack = function(word) {
+    var self = this
 
+    this.send('attack', word, function (err) {
+      if (err) return console.log(err)
+    })
     return this
   }
   Game.prototype.notify = function() {
