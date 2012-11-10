@@ -1,5 +1,6 @@
 
 var dictionary = require('./dictionary')
+  , async      = require('async')
   , app, io, db
 
 module.exports = function (app) {
@@ -21,26 +22,34 @@ function getRoom(socket) {
 function ioMain(socket) {
   var session = socket.handshake.session
 
-  console.log('rooms: ', io.sockets.manager.roomClients)
-
   socket.on('getRooms', function (cb) {
-    var roomNames = Object.keys(io.sockets.manager.rooms).filter(function (room) {
-      return room !== ''
-    }).map(function (room) {
-      return room.slice(1)
+    getRooms(function (err, rooms) {
+      console.log(rooms)
+      cb(rooms)
     })
-    console.log('getRooms: ', roomNames)
-    cb(roomNames)
   })
 
   socket.on('join', function (room, cb) {
-    var clients = io.sockets.clients(room)
+    if (room) {
+      socket.join(room.id)
+      return io.sockets.in(room.id).emit('join', socket.id)
+    }
 
-    if (clients.length === 2) return cb('Room is full')
+    getRooms(function (err, rooms) {
+      var joinableRooms = rooms.filter(function (room) {
+        return room.players.length < 2
+      })
 
-    socket.join(room)
-    io.sockets.in(room).emit('join', socket.id)
-    if (clients.length === 1) io.sockets.in(room).emit('start')
+      if (joinableRooms.length === 0) {
+        room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
+        socket.join(room)
+        return cb(null, room)
+      }
+
+      room = rooms[Math.floor(Math.random()*rooms.length)]
+      socket.join(room.id)
+      return io.sockets.in(room.id).emit('join', socket.id)
+    })
   })
 
   socket.on('sit', function (roomId) {
@@ -58,22 +67,46 @@ function ioMain(socket) {
 
   socket.on('leave', function (room, cb) {
     socket.leave(room)
-    clearRoom(room, socket)
-    cb()
+    stand(room, socket)
+  })
+
+  socket.on('sit', function (room, cb) {
+    var key = [room, 'currentplayers'].join(':')
+      , first = false
+
+    db.scard(key, gotSitting)
+
+    function gotSitting(err, length) {
+      if (length >= 2) return cb('There are no seats left')
+
+      if (length === 0) first = true
+
+      db.sadd(key, socket.id, addedSitter)
+    }
+
+    function addedSitter(err, res) {
+      if (res === 0) return cb('You are already sitting')
+
+      io.sockets.in(room).emit('sit', socket.id, first ? 0 : 1)
+      cb()
+    }
+  })
+
+  socket.on('stand', function (room, cb) {
+    stand(room, socket, cb)
   })
 
   socket.on('attack', function (word, cb) {
     var rooms = io.sockets.manager.roomClients[socket.id]
-      , others = io.sockets.clients('test')
       , room = Object.keys(rooms)[1]
-
-    console.log('attack: ', word, room)
 
     if (!room) {
       return cb('Not in a room')
     }
 
     room = room.slice(1)
+
+    var others = io.sockets.clients(room)
 
     others = others.filter(function (client) {
       return client.id !== socket.id
@@ -106,10 +139,11 @@ function ioMain(socket) {
       }
 
 
-      var multi = db.multi()
-      others.forEach(function (client) {
-        multi.sadd([room, 'currentwords'].join(':'), client.id + word)
+      var othersArray = others.map(function (client) {
+        return client.id + word
       })
+      var multi = db.multi()
+      multi.sadd([room, 'currentwords'].join(':'), othersArray)
       multi.exec(function (err) {
         console.log('checkAllWords: ', err, word, socket.id)
         io.sockets.in(room).emit('attack', word, socket.id)
@@ -122,21 +156,57 @@ function ioMain(socket) {
 
   socket.on('disconnect', function () {
     var rooms = io.sockets.manager.roomClients[socket.id]
-      , room = Object.keys(rooms)[1]
 
-    if (!room) {
-      return false
-    }
+    Object.keys(rooms).forEach(function (room) {
+      if (room === '') return
 
-    room = room.slice(1)
+      stand(room, socket)
+    })
 
-    clearRoom(room, socket)
   })
 
 }
 
-function clearRoom(room, socket) {
-  io.sockets.in(room).emit('leave', socket.id)
+function getRooms(cb) {
+  var rooms = Object.keys(io.sockets.manager.rooms).filter(function (room) {
+    return room !== ''
+  })
+
+  async.map(rooms, iterate, cb)
+
+  function iterate(room, callback) {
+    room = room.slice(1)
+
+    var roomObj = {
+        id: room
+      , clients: io.sockets.manager.rooms['/' + room]
+    }
+    
+    db.smembers([room, 'currentplayers'].join(':'), gotPlayers)
+
+    function gotPlayers(err, players) {
+      roomObj.players = players
+      
+      callback(null, roomObj)
+    }
+  }
+}
+
+function stand(room, socket, cb) {
+  var key = [room, 'currentplayers'].join(':')
+
+  db.srem(key, socket.id, removedSitting)
+
+  function removedSitting(err, res) {
+    if (res === 0) return cb && cb('Not sitting in that room')
+
+    io.sockets.in(room).emit('stand', socket.id)
+    clearRoom(room, socket)
+    cb && cb()
+  }
+}
+
+function clearRoom(room) {
   var multi = db.multi()
   multi.del([room, 'currentwords'].join(':'))
   multi.del([room, 'playedwords'].join(':'))

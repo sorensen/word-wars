@@ -45,12 +45,13 @@
 
       self.join(id)
     })
+
+    this.$el.on('click', '.join-room', function (e) {
+      self.join(false)
+    })
+
     this.$el.on('click', '.create-room', function (e) {
-      var roomName = $('#room-name').val()
-
-      if (roomName === '') return
-
-      self.join(roomName)
+      //self.join(false)
     })
 
     this.socket = socket
@@ -97,20 +98,19 @@
   }
   // Render all rooms
   Lobby.prototype.render = function(room) {
-    var $el = this.$el.find('[data-id="' + room + '"]')
+    var $el = this.$el.find('[data-id="' + room.id + '"]')
 
     // If the room does not exist, create it
     if (!$el || !$el.length) {
+      var players = room.players.length
+        , watchers = room.clients.length - room.players.length
       $el = $(''
-        + '<div class="game" data-id="' + room + '">'
+        + '<div class="game" data-id="' + room.id + '">'
         + '  <button class="join btn btn-info btn-small">Join</button>'
-        + '  <button class="watch btn btn btn-small">Watch</button>'
-        + '  <div class="clearfix"></div>'
-        + '  <div class="host"><strong>Host:</strong> <span>Some Host</span></div>'
-        + '  <div class="red-player"><strong>Red Player:</strong> <span>Player 1</span></div>'
-        + '  <div class="blue-player"><strong>Blue Player:</strong> <span>Player 2</span></div>'
-        + '  <div class="watchers"><strong>Watchers:</strong> <span>5</span></div>'
-        + '  <div class="words"><strong>Words:</strong> <span>80</span></div>'
+        + '  <div class="host"><span>Host:</span> Some Host</div>'
+        + '  <div class="blue-player"><span>Players:</span> ' + players + '</div>'
+        + '  <div class="watchers"><span>Watchers:</span> ' + watchers + '</div>'
+        + '  <div class="words"><span>Words:</span> 80</div>'
         + '</div>'
       )
       this.$el.append($el)
@@ -213,13 +213,13 @@
     this.socket.on('win', function () { self.won.apply(self, arguments) })
     this.socket.on('start', function () { self.start.apply(self, arguments) })
     this.socket.on('over', function () { self.over.apply(self, arguments) })
-
     this.socket.on('sat', function () { self.sat.apply(self, arguments) })
     this.socket.on('stood', function () { self.stood.apply(self, arguments) })
 
     console.log('connect')
-    this.send('join', this.id, function(e) {
-      console.log(e)
+    this.send('join', this.id, function(e, room) {
+      if (e) return
+      self.id = room
     })
     this.connected = true
     return this.updateSeats()
