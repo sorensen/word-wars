@@ -27,7 +27,7 @@
 
         <div class="game">
           <div class="host"></div>
-          <div class="opponent"></div>
+          <div class="blue-player"></div>
           <div class="watchers"></div>
           <div class="words"></div>
         </div>
@@ -37,7 +37,8 @@
       <!-- Word battle screen -->
       <div id="battle-mode">
         <div id="game" class="focus-">
-          <div class="board" id="player">
+          <div class="board" id="red-player">
+            <!--
             <div><p>one</p></div>
             <div><p>two</p></div>
             <div><p>three</p></div>
@@ -49,22 +50,12 @@
             <div><p>nine</p></div>
             <div><p>ten</p></div>
             <div><p>eleven</p></div>
+            -->
           </div>
-          <div class="board" id="opponent">
-          <!--
-            <div><p>one</p></div>
-            <div><p>two</p></div>
-            <div><p>three</p></div>
-            <div><p>four</p></div>
-            <div><p>five</p></div>
-            <div><p>six</p></div>
-            <div><p>seven</p></div>
-            <div><p>eight</p></div>
-            <div><p>nine</p></div>
-            <div><p>ten</p></div>
-            <div><p>eleven</p></div>
-          -->
+
+          <div class="board" id="blue-player">
           </div>
+
           <div id="input-wrapper">
             <input id="input" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
           </div>
@@ -84,22 +75,6 @@
                   <div>That</div>
                   <div>Computer</div>
                   <div>Spices</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-stats">
-                  <i class="icon icon-plus-sign"></i> Stats
-                </a>
-              </div>
-              <div id="collapse-stats" class="accordion-body collapse">
-                <div class="accordion-inner">
-                  <div>Wins: 20</div>
-                  <div>Losses: 12</div>
-                  <div>WPM: 83</div>
-                  <div>Words Played: 54</div>
                 </div>
               </div>
             </div>
@@ -128,26 +103,54 @@
           <div class="accordion" id="right-accordion">
             <div class="accordion-group">
               <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-users">
-                  <i class="icon icon-plus-sign"></i> Users
+                <a class="accordion-toggle box red-player" data-toggle="collapse" href="#collapse-red-player">
+                  <i class="icon icon-user"></i> Red Player
                 </a>
               </div>
-              <div id="collapse-users" class="accordion-body collapse">
+              <div id="collapse-red-player" class="accordion-body">
                 <div class="accordion-inner">
-                  Blah blah blah
+                  <div>Wins: 20</div>
+                  <div>Losses: 12</div>
+                  <div>WPM: 83</div>
+                  <div>Words Played: 54</div>
                 </div>
               </div>
             </div>
 
             <div class="accordion-group">
               <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-opponent">
-                  <i class="icon icon-plus-sign"></i> Opponent
+                <a class="accordion-toggle box blue-player" data-toggle="collapse" href="#collapse-blue-player">
+                  <i class="icon icon-user"></i> Blue Player
                 </a>
               </div>
-              <div id="collapse-opponent" class="accordion-body collapse">
+              <div id="collapse-blue-player" class="accordion-body">
                 <div class="accordion-inner">
-                  Blah blah blah
+                  <div>Wins: 20</div>
+                  <div>Losses: 12</div>
+                  <div>WPM: 83</div>
+                  <div>Words Played: 54</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-users">
+                  <i class="icon icon-plus-sign"></i> Room 1
+                </a>
+              </div>
+              <div id="collapse-users" class="accordion-body">
+                <div class="accordion-inner">
+                  User 1
+                </div>
+                <div class="accordion-inner">
+                  User 2
+                </div>
+                <div class="accordion-inner">
+                  User 3
+                </div>
+                <div class="accordion-inner">
+                  User 4
                 </div>
               </div>
             </div>
@@ -172,6 +175,7 @@
   <script src="/socket.io/socket.io.js"></script> 
   <script src="/js/jquery-1.8.2.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
 </body> 
 </html>

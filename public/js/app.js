@@ -47,6 +47,10 @@
 
     this.playerWords = {}
     this.opponentWords = {}
+
+    this.socket.on('connect', function() { 
+      self.connect()
+    })
   }
 
   // Socket actions
