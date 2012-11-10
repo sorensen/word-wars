@@ -157,7 +157,7 @@
   // Socket actions
   // --------------
 
-  Game.prototype.connect = function() {
+  Game.prototype.connect = function(room) {
     var self = this
 
     this.playerId = this.socket.socket.sessionid
@@ -168,21 +168,22 @@
     this.listeners = [
       'used'
     , 'attack'
+    , 'players'
     , 'block'
     , 'lose'
     , 'win'
     , 'start'
     , 'over'
     ]
-    // this.socket.on('used', function() { self.usedWord.apply(self, arguments) })
-    this.socket.on('used', this.usedWord.bind(this))
-    this.socket.on('attack', this.attacked.bind(this))
-    //this.socket.on('players', this.players.bind(this))
-    this.socket.on('block', this.blocked.bind(this))
-    this.socket.on('lose', this.lost.bind(this))
-    this.socket.on('win', this.won.bind(this))
-    this.socket.on('start', this.start.bind(this))
-    this.socket.on('over', this.over.bind(this))
+    this.socket.on('used', function () { self.usedWord.apply(self, arguments) })
+    this.socket.on('attack', function () { self.attacked.apply(self, arguments) })
+    this.socket.on('players', function () { self.players.apply(self, arguments) })
+    this.socket.on('block', function () { self.blocked.apply(self, arguments) })
+    this.socket.on('lose', function () { self.lost.apply(self, arguments) })
+    this.socket.on('win', function () { self.won.apply(self, arguments) })
+    this.socket.on('start', function () { self.start.apply(self, arguments) })
+    this.socket.on('over', function () { self.over.apply(self, arguments) 
+
     return this
   }
   Game.prototype.send = function(action, word, fn) {
@@ -306,9 +307,14 @@
 
   // Player has quit the game
   Game.prototype.quit = function() {
+<<<<<<< HEAD
     for (var i = 0; i !== this.listeners.length; i++) {
       this.socket.removeListener(this.listeners[i])
     }
+=======
+    this.socket.emit('leave', this.room)
+    this.socket.off()
+>>>>>>> 154ba1156f643847f0d8a7aaf529a03fd8f3353f
     return this.reset()
   }
 
@@ -377,8 +383,13 @@
   }
 
   $(function() {
-    window.game = new Game()
+    //window.game = new Game()
     window.lobby = new Lobby(io.connect())
+
+    $('#lobby-mode').on('click', '.join', function (e) {
+      var room = $(this).data('room')
+      window.lobby.join(room)
+    })
   })
 
 

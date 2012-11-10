@@ -20,11 +20,11 @@ function ioMain(socket) {
   socket.on('join', function (room, cb) {
     var clients = io.sockets.clients(room)
 
-    console.log('join; ', room, clients)
     if (clients.length === 2) return cb('Room is full')
 
     socket.join(room)
     io.sockets.in(room).emit('join', socket.id)
+    if (clients.length === 1) io.sockets.in(room).emit('start')
   })
 
   socket.on('leave', function (room) {
