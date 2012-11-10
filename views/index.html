@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Word Wars</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/font-awesome.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="wrapper" class="battle">
+    <div id="top" class="color-strip">
+      <div class="color-1"></div>
+      <div class="color-2"></div>
+      <div class="color-3"></div>
+      <div class="color-4"></div>
+    </div>
+
+    <div id="header">
+      <div id="logo">word battle</div>
+      <!--<div id="spacer"></div>-->
+    </div>
+
+    <div id="inner">
+
+      <!-- Game lobby -->
+      <div id="lobby-mode">
+
+        <div class="game">
+          <div class="host"></div>
+          <div class="opponent"></div>
+          <div class="watchers"></div>
+          <div class="words"></div>
+        </div>
+
+      </div>
+
+      <!-- Word battle screen -->
+      <div id="battle-mode">
+        <div id="game" class="focus-">
+          <div class="board" id="player">
+            <div><p>one</p></div>
+            <div><p>two</p></div>
+            <div><p>three</p></div>
+            <div><p>four</p></div>
+            <div><p>five</p></div>
+            <div><p>six</p></div>
+            <div><p>seven</p></div>
+            <div><p>eight</p></div>
+            <div><p>nine</p></div>
+            <div><p>ten</p></div>
+            <div><p>eleven</p></div>
+          </div>
+          <div class="board" id="opponent">
+            <div><p>one</p></div>
+            <div><p>two</p></div>
+            <div><p>three</p></div>
+            <div><p>four</p></div>
+            <div><p>five</p></div>
+            <div><p>six</p></div>
+            <div><p>seven</p></div>
+            <div><p>eight</p></div>
+            <div><p>nine</p></div>
+            <div><p>ten</p></div>
+            <div><p>eleven</p></div>
+          </div>
+          <div id="input-wrapper">
+            <input id="input" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
+          </div>
+        </div>
+
+        <div id="left" class="sidebar">
+          <div class="accordion" id="left-accordion">
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-words-played">
+                  <i class="icon icon-plus-sign"></i> Words Played
+                </a>
+              </div>
+              <div id="collapse-words-played" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  <div>Wisdom</div>
+                  <div>That</div>
+                  <div>Computer</div>
+                  <div>Spices</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-stats">
+                  <i class="icon icon-plus-sign"></i> Stats
+                </a>
+              </div>
+              <div id="collapse-stats" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  <div>Wins: 20</div>
+                  <div>Losses: 12</div>
+                  <div>WPM: 83</div>
+                  <div>Words Played: 54</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-ammo">
+                  <i class="icon icon-plus-sign"></i> Ammo
+                </a>
+              </div>
+              <div id="collapse-ammo" class="accordion-body collapse in">
+                <div class="accordion-inner">
+                  <div>Something</div>
+                  <div>Another</div>
+                  <div>Suggestive</div>
+                  <div>Pumpkin</div>
+                  <div>Zombie</div>
+                  <div>Template</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="right" class="sidebar">
+          <div class="accordion" id="right-accordion">
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-users">
+                  <i class="icon icon-plus-sign"></i> Users
+                </a>
+              </div>
+              <div id="collapse-users" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  Blah blah blah
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-group">
+              <div class="accordion-heading">
+                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-opponent">
+                  <i class="icon icon-plus-sign"></i> Opponent
+                </a>
+              </div>
+              <div id="collapse-opponent" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  Blah blah blah
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="modal"></div>
+
+    <div id="menu"><a id="home" class="box icon-home"></a><a id="games" class="box icon-globe"></a><a id="create" class="box icon-heart"></a></div>
+
+    <div id="bottom" class="color-strip">
+      <div class="color-4"></div>
+      <div class="color-3"></div>
+      <div class="color-2"></div>
+      <div class="color-1"></div>
+    </div>
+
+  </div>
+  <script src="/js/jquery-1.8.2.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/app.js"></script>
+</body> 
+</html>
