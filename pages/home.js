@@ -4,7 +4,8 @@ var home = {}
 
 module.exports = function(app) {
   db = app.settings.db
-  return home
+
+  app.get('/', home.index)
 }
 
 home.index = function index(req, res, next) {

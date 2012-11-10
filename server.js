@@ -1,13 +1,11 @@
-var express = require('express')
-  , app     = express()
-  , http    = require('http')
-  , server  = http.createServer(app)
+var app     = require('express')()
+  , server  = require('http').createServer(app)
 
 app.set('server', server)
 
 require('./config')(app)
 
-require('./routes')(app)
+require('./pages')(app)
 
 require('./realtime')(app)
 

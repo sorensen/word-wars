@@ -1,8 +1,13 @@
-module.exports = function (app) {
-  var io = app.settings.io
-    , db = app.settings.db
+var app, io, db
 
-  io.sockets.on('connection', function (socket) {
-    // Stuff here
+module.exports = function (app) {
+  io = app.settings.io
+  db = app.settings.db
+  io.sockets.on('connection', ioMain)
+}
+
+function ioMain(socket) {
+  socket.on('test', function (data) {
+    console.log(data)
   })
 }
