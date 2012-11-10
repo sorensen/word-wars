@@ -1,8 +1,9 @@
 var express     = require('express')
   , connect     = require('connect')
+  , cookie      = require('cookie')
   , redis       = require('redis')
   , ejs         = require('ejs')
-  , parseCookie = connect.utils.parseCookie
+  , parseCookie = connect.utils.parseSignedCookies
   , RedisStore  = require('connect-redis')(express)
 
 module.exports = function (app) {
@@ -30,6 +31,7 @@ module.exports = function (app) {
     app.set('io', io)
     app.set('db', redis.createClient(app.settings.redis.port, app.settings.redis.host))
     app.set('sessionStore', new RedisStore({client: app.settings.db}))
+    app.set('sessionSecret', 'IvIVKmFkjE!!a3fP6C38%m%C0%n094bpGnn73GrJU5$oET6!tI^a4pmFs7X3!Ue^')
     app.use(express.static(__dirname + '/public'))
     app.use(express.bodyParser())
     app.use(express.methodOverride())
@@ -37,7 +39,7 @@ module.exports = function (app) {
     app.use(express.cookieParser())
     app.use(express.session({
         store: app.settings.sessionStore
-      , secret: 'IvIVKmFkjE!!a3fP6C38%m%C0%n094bpGnn73GrJU5$oET6!tI^a4pmFs7X3!Ue^'
+      , secret: app.settings.sessionSecret
     }))
     app.use(express.errorHandler({ 
       dumpExceptions: true
@@ -53,13 +55,14 @@ module.exports = function (app) {
         return callback('No cookie', false)
       }
 
-      var cookie = parseCookie(data.headers.cookie)
-      app.settings.sessionStore.get(cookie['connect.sid'], function (err, session) {
+      var parsedCookie = parseCookie(cookie.parse(decodeURIComponent(data.headers.cookie)), app.settings.sessionSecret)
+      app.settings.sessionStore.get(parsedCookie['connect.sid'], function (err, session) {
         if (err || !session) {
           return callback('Error', false)
         }
 
         data.session = session
+        data.session.id = parsedCookie['connect.sid']
         callback(null, true)
       })
     })

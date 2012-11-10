@@ -17,7 +17,9 @@
     this.players = {}
     this.playerId = null
 
-    this.socket.on('connect', function() { self.connect() })
+    this.socket.on('connect', function() { 
+      self.connect()
+    })
   }
 
   // Socket actions
