@@ -10,12 +10,18 @@ module.exports = function (app) {
 function ioMain(socket) {
   var session = socket.handshake.session
 
-  socket.on('join', function (room) {
+  socket.on('join', function (room, cb) {
+    var clients = io.sockets.clients(room)
+
+    if (clients.length === 2) return cb('Room is full')
+
     socket.join(room)
+    io.sockets.in(room).emit('join', socket.id)
   })
 
   socket.on('leave', function (room) {
     socket.leave(room)
+    clearRoom(room, socket)
   })
 
   socket.on('attack', function (word, cb) {
@@ -27,7 +33,7 @@ function ioMain(socket) {
       return cb('Not in a room')
     }
 
-    room.slice(1)
+    room = room.slice(1)
 
     others = others.filter(function (client) {
       return client.id !== socket.id
@@ -39,7 +45,7 @@ function ioMain(socket) {
       return cb('Invalid word')
     }
 
-    db.srem([room, socket.id, 'currentwords'].join(':'), word, checkPlayerWords)
+    db.srem([room, 'currentwords'].join(':'), socket.id + word, checkPlayerWords)
 
     function checkPlayerWords(err, res) {
       if (err) return cb('Error checking word')
@@ -62,7 +68,7 @@ function ioMain(socket) {
 
       var multi = db.multi()
       others.forEach(function (client) {
-        multi.sadd([room, client.id, 'currentwords'].join(':'), word)
+        multi.sadd([room, 'currentwords'].join(':'), socket.id + word)
       })
       multi.exec(function (err) {
         io.sockets.in(room).emit('attack', word, socket.id)
@@ -72,4 +78,26 @@ function ioMain(socket) {
     }
 
   })
+
+  socket.on('disconnect', function () {
+    var rooms = io.sockets.manager.roomClients[socket.id]
+      , room = Object.keys(rooms)[1]
+
+    if (!room) {
+      return false
+    }
+
+    room = room.slice(1)
+
+    clearRoom(room, socket)
+  })
+
+}
+
+function clearRoom(room, socket) {
+  io.sockets.in(room).emit('leave', socket.id)
+  var multi = db.multi()
+  multi.del([room, 'currentwords'].join(':'))
+  multi.del([room, 'playedwords'].join(':'))
+  multi.exec()
 }
