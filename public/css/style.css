@@ -36,6 +36,14 @@ a:hover .icon {
   background: #CCEBF5;
 }
 
+#wrapper .box.blue-player {
+background: blue;
+}
+
+#wrapper .box.red-player {
+background: red;
+}
+
 
 /* =============================================================================
    Fonts
@@ -259,16 +267,27 @@ html, body {
     vertical-align: middle; 
     text-align: center; 
   }
-  .board div + div {
-    /*border-top: 1px solid #ccc;*/
+  /*.board div + div {*/
+    /*border-top: 1px solid red;*/
+  /*}*/
+
+  #red-player.board div {
+    border-left: 1px solid red;
+    border-right: 1px solid red;
   }
 
+  #blue-player.board div {
+    border-left: 1px solid blue;
+    border-right: 1px solid blue;
+  }
 
-  .focus-player #player, .focus-opponent #opponent {
+  .focus-red-player #red-player, 
+  .focus-blue-player #blue-player {
     width: 69.5%;
     font-size: 32px;
   }
-  .focus-player #opponent, .focus-opponent #player {
+  .focus-red-player #blue-player, 
+  .focus-blue-player #red-player {
     width: 29.5%;
     font-size: 16px;
   }
