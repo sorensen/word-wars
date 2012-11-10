@@ -21,6 +21,7 @@
 
   function Lobby(socket) {
     var self = this
+    this.$wrapper = $('#wrapper')
     this.socket = socket
     this.socket.on('connect', function() { 
       self.connect() 
@@ -36,11 +37,17 @@
   // Join a game
   Lobby.prototype.join = function() {
     this.game = new Game(this.socket).connect()
+    this.$wrapper
+      .removeClass('lobby')
+      .addClass('battle')
     return this
   }
   // Leave the game
   Lobby.prototype.leave = function() {
     this.game.quit()
+    this.$wrapper
+      .removeClass('battle')
+      .addClass('lobby')
     return this
   }
   // Render all rooms
