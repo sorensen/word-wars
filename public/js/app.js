@@ -104,6 +104,8 @@
     if (!$el || !$el.length) {
       var players = room.players.length
         , watchers = room.clients.length - room.players.length
+
+      watchers = watchers >= 0 ? watchers : 0
       $el = $(''
         + '<div class="game" data-id="' + room.id + '">'
         + '  <button class="join btn btn-info btn-small">Join</button>'
@@ -144,6 +146,7 @@
     this.socket = socket
     this.id = id
     this.listeners = []
+    this.seats = {}
     this.$el = $('#battle-mode')
     this.$input = $('#input')
     this.$red = $('#' + playerOne)
@@ -355,18 +358,18 @@
     })
     return this.reset()
   }
-  Game.prototype.sat = function(seat, id) {
+  Game.prototype.sat = function(id, seat) {
     if (id === this.pid) {
       this.isSitting = true
     }
-    this[this.getSeat(seat)] = id
+    this.seats[this.getSeat(seat)] = id
     return this.updateSeats()
   }
-  Game.prototype.stood = function(seat, id) {
+  Game.prototype.stood = function(id) {
     if (id === this.pid) {
       this.isSitting = false
     }
-    this[this.getSeat(seat)] = null
+    this.seats[this.getSeatByPlayer(id)] = null
     return this.updateSeats()
   }
 
@@ -374,8 +377,18 @@
   Game.prototype.getSeat = function(seat) {
     return seat === 'red' ? 'red' : 'blue'
   }
+  Game.prototype.getSeatByPlayer = function (playerId) {
+    var self = this
+      , seat
+
+    Object.keys(this.seats).forEach(function (key) {
+      if (self.seats[seat] === playerId) seat = key
+    })
+    
+    return seat
+  }
   Game.prototype.getPlayer = function(seat) {
-    return this[this.getSeat(seat)]
+    return this.seats[this.getSeat(seat)]
   }
 
   // Game actions
@@ -405,8 +418,8 @@
     }
     var self = this
       , pid = this.pid
-      , red = this.red
-      , blue = this.blue
+      , red = this.seats.red
+      , blue = this.seats.blue
       , seat
 
     pid === red && (seat = red)
@@ -422,8 +435,8 @@
   Game.prototype.updateSeats = function() {
     var self = this
       , pid = this.pid
-      , red = this.red
-      , blue = this.blue
+      , red = this.seats.red
+      , blue = this.seats.blue
 
     // Both players sitting
     if (red && blue) {

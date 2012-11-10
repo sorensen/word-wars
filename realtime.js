@@ -9,16 +9,6 @@ module.exports = function (app) {
   io.sockets.on('connection', ioMain)
 }
 
-function getRoom(socket) {
-  var rooms = io.sockets.manager.roomClients[socket.id]
-    , room = Object.keys(rooms)[1]
-
-  if (room) {
-    return room.slice(1)
-  }
-  return null
-}
-
 function ioMain(socket) {
   var session = socket.handshake.session
 
@@ -31,8 +21,8 @@ function ioMain(socket) {
 
   socket.on('join', function (room, cb) {
     if (room) {
-      socket.join(room.id)
-      return io.sockets.in(room.id).emit('join', socket.id)
+      socket.join(room)
+      return io.sockets.in(room).emit('join', socket.id)
     }
 
     getRooms(function (err, rooms) {
@@ -50,19 +40,6 @@ function ioMain(socket) {
       socket.join(room.id)
       return io.sockets.in(room.id).emit('join', socket.id)
     })
-  })
-
-  socket.on('sit', function (roomId) {
-    var room = getRoom(socket)
-    if (room) {
-      io.sockets.in(room).emit('sat', seat, playerId)
-    }
-  })
-  socket.on('stand', function (roomId) {
-    var room = getRoom(socket)
-    if (room) {
-      io.sockets.in(room).emit('stood', seat, playerId)
-    }
   })
 
   socket.on('leave', function (room, cb) {
@@ -87,7 +64,7 @@ function ioMain(socket) {
     function addedSitter(err, res) {
       if (res === 0) return cb('You are already sitting')
 
-      io.sockets.in(room).emit('sit', socket.id, first ? 0 : 1)
+      io.sockets.in(room).emit('sat', socket.id, first ? 'red' : 'blue')
       cb()
     }
   })
@@ -169,12 +146,13 @@ function ioMain(socket) {
 
 function getRooms(cb) {
   var rooms = Object.keys(io.sockets.manager.rooms).filter(function (room) {
-    return room !== ''
+    return room && room !== ''
   })
 
   async.map(rooms, iterate, cb)
 
   function iterate(room, callback) {
+    console.log(room)
     room = room.slice(1)
 
     var roomObj = {
@@ -200,7 +178,7 @@ function stand(room, socket, cb) {
   function removedSitting(err, res) {
     if (res === 0) return cb && cb('Not sitting in that room')
 
-    io.sockets.in(room).emit('stand', socket.id)
+    io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
     cb && cb()
   }
