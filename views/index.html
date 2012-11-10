@@ -27,7 +27,7 @@
       <div id="lobby-mode">
 
         <div class="game">
-          <button class="join btn btn-info btn-small">Join</button>
+          <button class="join btn btn-info btn-small" data-room="test">Join</button>
 
           <div class="host"><span>Host:</span> Some Host</div>
           <div class="blue-player"><span>Player:</span> Player 1</div>
@@ -178,7 +178,8 @@
     </div>
 
   </div>
-  <script src="/socket.io/socket.io.js"></script> 
+  <script src="/js/es5-shim.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/jquery-1.8.2.min.js"></script>
   <script src="/js/jquery-ui-1.9.1.custom.min.js"></script>
   <script src="/js/jquery.countdown.js"></script>

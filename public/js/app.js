@@ -35,8 +35,8 @@
     return this
   }
   // Join a game
-  Lobby.prototype.join = function() {
-    this.game = new Game(this.socket).connect()
+  Lobby.prototype.join = function(room) {
+    this.game = new Game(this.socket).connect(room)
     this.$wrapper
       .removeClass('lobby')
       .addClass('battle')
@@ -102,23 +102,41 @@
   // Socket actions
   // --------------
 
-  Game.prototype.connect = function() {
+  Game.prototype.connect = function(room) {
     var self = this
 
     this.playerId = this.socket.socket.sessionid
 
-    this.send('join', 'test', function (e) {
-      console.log(e)
+    this.socket.emit('join', room, function (err) {
+      if (err) console.log(err)
+
+      self.room = room
     })
 
-    this.socket.on('used', this.usedWord.bind(this))
-    this.socket.on('attack', this.attacked.bind(this))
-    //this.socket.on('players', this.players.bind(this))
-    this.socket.on('block', this.blocked.bind(this))
-    this.socket.on('lose', this.lost.bind(this))
-    this.socket.on('win', this.won.bind(this))
-    this.socket.on('start', this.start.bind(this))
-    this.socket.on('over', this.over.bind(this))
+    this.socket.on('used', function () {
+      self.usedWord.apply(self, arguments)
+    })
+    this.socket.on('attack', function () {
+      self.attacked.apply(self, arguments)
+    })
+    this.socket.on('players', function () {
+      self.players.apply(self, arguments)
+    })
+    this.socket.on('block', function () {
+      self.blocked.apply(self, arguments)
+    })
+    this.socket.on('lose', function () {
+      self.lost.apply(self, arguments)
+    })
+    this.socket.on('win', function () {
+      self.won.apply(self, arguments)
+    })
+    this.socket.on('start', function () {
+      self.start.apply(self, arguments)
+    })
+    this.socket.on('over', function () {
+      self.over.apply(self, arguments)
+    })
     return this
   }
   Game.prototype.send = function(action, word, fn) {
@@ -243,6 +261,7 @@
 
   // Player has quit the game
   Game.prototype.quit = function() {
+    this.socket.emit('leave', this.room)
     this.socket.off()
     return this.reset()
   }
@@ -312,8 +331,13 @@
   }
 
   $(function() {
-    window.game = new Game()
+    //window.game = new Game()
     window.lobby = new Lobby(io.connect())
+
+    $('#lobby-mode').on('click', '.join', function (e) {
+      var room = $(this).data('room')
+      window.lobby.join(room)
+    })
   })
 
 
