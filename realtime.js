@@ -13,8 +13,14 @@ function ioMain(socket) {
 
   console.log('rooms: ', io.sockets.manager.roomClients)
 
-  socket.on('getGames', function (cb) {
-    cb(io.sockets.manager.roomClients)
+  socket.on('getRooms', function (cb) {
+    var roomNames = Object.keys(io.sockets.manager.rooms).filter(function (room) {
+      return room !== ''
+    }).map(function (room) {
+      return room.slice(1)
+    })
+    console.log('getRooms: ', roomNames)
+    cb(roomNames)
   })
 
   socket.on('join', function (room, cb) {
@@ -27,9 +33,10 @@ function ioMain(socket) {
     if (clients.length === 1) io.sockets.in(room).emit('start')
   })
 
-  socket.on('leave', function (room) {
+  socket.on('leave', function (room, cb) {
     socket.leave(room)
     clearRoom(room, socket)
+    cb()
   })
 
   socket.on('attack', function (word, cb) {

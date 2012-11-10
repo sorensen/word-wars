@@ -6,6 +6,7 @@
     , $win = $(window)
     , $body = $('body')
     , getChar = String.fromCharCode
+    , concat = Array.prototype.concat
     , speed = 5
     , current
     , ENTER = 13
@@ -31,19 +32,27 @@
     this.game = null
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
-    this.$lobby = $('#lobby-mode')
+    this.$el = $('#lobby-mode')
 
     $win.unload(function() {
       self.game && self.game.quit()
     })
     this.$home.click(function() { self.home() })
 
-    this.$lobby.on('click', '.join', function(e) {
+    this.$el.on('click', '.join', function(e) {
       var $el = $(this)
         , id = $el.parent().data('id')
 
       self.join(id)
     })
+    this.$el.on('click', '.create-room', function (e) {
+      var roomName = $('#room-name').val()
+
+      if (roomName === '') return
+
+      self.join(roomName)
+    })
+
     this.socket = socket
     this.socket.on('connect', function() { 
       self.connect() 
@@ -57,12 +66,12 @@
   Lobby.prototype.connect = function() {
     var self = this
 
-    this.socket.emit('getGames', function(rooms) {
-      console.log('rooms: ', rooms)
+    this.socket.emit('getRooms', function(rooms) {
+      if (rooms.length === 0) return self
 
-      for (var key in rooms) {
-        self.render(key, rooms[key])
-      }
+      rooms.forEach(function (room) {
+        self.render(room)
+      })
     })
     return this
   }
@@ -87,13 +96,13 @@
     return this
   }
   // Render all rooms
-  Lobby.prototype.render = function(id, room) {
-    var $el = this.$lobby.find('[data-id="' + id + '"]')
+  Lobby.prototype.render = function(room) {
+    var $el = this.$el.find('[data-id="' + room + '"]')
 
     // If the room does not exist, create it
     if (!$el || !$el.length) {
       $el = $(''
-        + '<div class="game" data-id="' + id + '">'
+        + '<div class="game" data-id="' + room + '">'
         + '  <button class="join btn btn-info btn-small">Join</button>'
         + '  <button class="watch btn btn btn-small">Watch</button>'
         + '  <div class="clearfix"></div>'
@@ -104,7 +113,7 @@
         + '  <div class="words"><strong>Words:</strong> <span>80</span></div>'
         + '</div>'
       )
-      this.$lobby.append($el)
+      this.$el.append($el)
     } else {
       this.update($el, room)
     }
@@ -135,12 +144,19 @@
     this.socket = socket
     this.id = id
     this.listeners = []
+    this.$el = $('#battle-mode')
     this.$input = $('#input')
-    this.$player = $('#' + playerOne)
-    this.$opponent = $('#' + playerTwo)
+    this.$red = $('#' + playerOne)
+    this.$blue = $('#' + playerTwo)
+    this.$redSeat = $('#red-seat')
+    this.$blueSeat = $('#blue-seat')
     this.$notification = $('#notification')
     this.$counter = $('#counter')
 
+    this.$el.on('click', '.sit', function(e) {
+      console.log('click sit: ', this, arguments)
+      self.sit.call(self, this, e)
+    })
     this.reset()
     // Permanently focus the game input
     $win.click(function(e) {
@@ -161,7 +177,7 @@
   Game.prototype.reset = function() {
     this.words = {}
     this.players = {}
-    this.playerId = null
+    this.pid = null
     this.playerWords = {}
     this.opponentWords = {}
     return this.disableInput()
@@ -176,7 +192,7 @@
     if (this.connected) {
       return this
     }
-    this.playerId = this.socket.socket.sessionid
+    this.pid = this.socket.socket.sessionid
     this.listeners = [
       'used'
     , 'attack'
@@ -227,8 +243,8 @@
   Game.prototype.attacked = function(word, id) {
     word = word.toLowerCase().trim()
 
-    var me = id === this.playerId
-      , $el = me ? this.$opponent : this.$player
+    var me = id === this.pid
+      , $el = me ? this.$blue : this.$red
       , $word = $('<div><p>' + word + '</p></div>')
 
     if (me) {
@@ -260,7 +276,7 @@
       })
   }
   Game.prototype.blocked = function(word, id) {
-    var me = id === this.playerId
+    var me = id === this.pid
 
     word = word.toLowerCase().trim()
 
@@ -326,21 +342,86 @@
   // Player has quit the game
   Game.prototype.quit = function() {
     var self = this
-    this.send('leave', this.id, function(e) {
+    this.send('leave', this.id, function(e) {\
       for (var i = 0; i !== self.listeners.length; i++) {
-        console.log('remove listener: ', self.listeners[i])
         self.socket.removeAllListeners(self.listeners[i])
       }
       self.connected = false
     })
     return this.reset()
   }
+  Game.prototype.sat = function(seat, id) {
+    if (id === this.pid) {
+      this.isSitting = true
+    }
+    this[this.getSeat(seat)] = id
+    return this.updateSeats()
+  }
+  Game.prototype.stood = function(seat, id) {
+    if (id === this.pid) {
+      this.isSitting = false
+    }
+    this[this.getSeat(seat)] = id
+    return this.updateSeats()
+  }
+
+  // Normalize seat names for security
+  Game.prototype.getSeat = function(seat) {
+    return seat === 'red' ? 'red' : 'blue'
+  }
+  Game.prototype.getPlayer = function(seat) {
+    return this[this.getSeat(seat)]
+  }
 
   // Game actions
   // ------------
 
-  Game.prototype.setup = function() {
-    this.socket.on()
+  Game.prototype.sit = function(el, e) {
+    var self = this
+      , $el = $(el)
+      , seat = this.getSeat($el.data('player'))
+      , player = this.getPlayer(seat)
+
+    if (!player) {
+      this.send('sit', this.id, seat, this.pid, function(err) {
+        err && self.notify(err)
+      })
+    } else {
+      this.notify('That seat is taken')
+    }
+    return this
+  }
+  Game.prototype.stand = function() {
+    var self = this
+      , pid = this.pid
+      , red = this.red
+      , blue = this.blue
+      , seat
+
+    pid === red && (seat = red)
+    pid === blue && (seat = blue)
+    
+    if (seat) {
+      this.send('stand', this.id, seat, pid, function(err) {
+        err && self.notify(err)
+      })
+    }
+    return this
+  }
+  Game.prototype.updateSeats = function() {
+    ;['red'
+    , 'blue'
+    ].forEach(function(player) {
+      if (this[player]) {
+        this['$' + player + 'Seat']
+          .attr('disabled', 'disabled')
+          .html('<i class="icon icon-user"></i>')
+      } else {
+        this['$' + player + 'Seat']
+          .removeAttr('disabled')
+          .html('Sit')
+      }
+    })
     return this
   }
   Game.prototype.fail = function() {
@@ -368,8 +449,8 @@
   Game.prototype.stack = function() {
     var self = this
 
-    ;[this.$player.children()
-    , this.$opponent.children()
+    ;[this.$red.children()
+    , this.$blue.children()
     ].forEach(function($els) {
       var len = $els.length
 

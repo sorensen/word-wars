@@ -25,7 +25,11 @@
 
       <!-- Game lobby -->
       <div id="lobby-mode">
-
+        <div style="text-align: center">
+          Room Name: <input id="room-name"/>
+          <br>
+          <button class="create-room btn btn-info btn-large">Create Room</button>
+        </div>
         <!--
         <div class="game">
           <button class="join btn btn-info btn-small" data-room="test">Join</button>
@@ -56,9 +60,11 @@
             <div><p>ten</p></div>
             <div><p>eleven</p></div>
             -->
+            <button id="red-seat" data-player="red" class="btn sit">Sit</button>
           </div>
 
           <div class="board" id="blue-player">
+            <button id="blue-seat" data-player="blue" class="btn sit">Sit</button>
           </div>
 
           <div id="input-wrapper">
