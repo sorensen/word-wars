@@ -13,8 +13,14 @@ function ioMain(socket) {
 
   console.log('rooms: ', io.sockets.manager.roomClients)
 
-  socket.on('getGames', function (cb) {
-    cb(io.sockets.manager.roomClients)
+  socket.on('getRooms', function (cb) {
+    var roomNames = Object.keys(io.sockets.manager.rooms).filter(function (room) {
+      return room !== ''
+    }).map(function (room) {
+      return room.slice(1)
+    })
+    console.log('getRooms: ', roomNames)
+    cb(roomNames)
   })
 
   socket.on('join', function (room, cb) {

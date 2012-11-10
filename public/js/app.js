@@ -46,6 +46,14 @@
       self.join(id)
     })
 
+    this.$lobby.on('click', '.create-room', function (e) {
+      var roomName = $('#room-name').val()
+
+      if (roomName === '') return
+
+      self.join(roomName)
+    })
+
 
     this.socket = socket
     this.socket.on('connect', function() { 
@@ -60,12 +68,12 @@
   Lobby.prototype.connect = function() {
     var self = this
 
-    this.socket.emit('getGames', function(rooms) {
-      console.log('rooms: ', rooms)
+    this.socket.emit('getRooms', function(rooms) {
+      if (rooms.length === 0) return self
 
-      for (var key in rooms) {
-        self.render(key, rooms[key])
-      }
+      rooms.forEach(function (room) {
+        self.render(room)
+      })
     })
     return this
   }
@@ -90,13 +98,13 @@
     return this
   }
   // Render all rooms
-  Lobby.prototype.render = function(id, room) {
-    var $el = this.$lobby.find('[data-id="' + id + '"]')
+  Lobby.prototype.render = function(room) {
+    var $el = this.$lobby.find('[data-id="' + room + '"]')
 
     // If the room does not exist, create it
     if (!$el || !$el.length) {
       $el = $(''
-        + '<div class="game" data-id="' + id + '">'
+        + '<div class="game" data-id="' + room + '">'
         + '  <button class="join btn btn-info btn-small">Join</button>'
         + '  <div class="host"><span>Host:</span> Some Host</div>'
         + '  <div class="blue-player"><span>Player:</span> Player 1</div>'
@@ -178,7 +186,7 @@
     this.socket.on('lose', function () { self.lost.apply(self, arguments) })
     this.socket.on('win', function () { self.won.apply(self, arguments) })
     this.socket.on('start', function () { self.start.apply(self, arguments) })
-    this.socket.on('over', function () { self.over.apply(self, arguments) 
+    this.socket.on('over', function () { self.over.apply(self, arguments) })
 
     this.send('join', this.id, function(e) {
       console.log(e)
@@ -381,11 +389,6 @@
   $(function() {
     //window.game = new Game()
     window.lobby = new Lobby(io.connect())
-
-    $('#lobby-mode').on('click', '.join', function (e) {
-      var room = $(this).data('room')
-      window.lobby.join(room)
-    })
   })
 
 
