@@ -153,10 +153,10 @@
     this.$notification = $('#notification')
     this.$counter = $('#counter')
 
-    this.$el.on('click', '.sit', function(e) {
-      console.log('click sit: ', this, arguments)
-      self.sit.call(self, this, e)
-    })
+    this.$sit = $('#sit')
+    this.$stand = $('#stand')
+
+
     this.reset()
     // Permanently focus the game input
     $win.click(function(e) {
@@ -171,6 +171,8 @@
         self.$input.val('')
       }
     })
+    this.$sit.click(function() { self.sit() })
+    this.$stand.click(function() { self.stand() })
     return this
   }
 
@@ -220,7 +222,7 @@
       console.log(e)
     })
     this.connected = true
-    return this
+    return this.updateSeats()
   }
   Game.prototype.send = function() {
     var self = this
@@ -364,7 +366,7 @@
     if (id === this.pid) {
       this.isSitting = false
     }
-    this[this.getSeat(seat)] = id
+    this[this.getSeat(seat)] = null
     return this.updateSeats()
   }
 
@@ -389,7 +391,7 @@
       , player = this.getPlayer(seat)
 
     if (!player) {
-      this.send('sit', this.id, seat, this.pid, function(err) {
+      this.send('sit', this.id, function(err) {
         err && self.notify(err)
       })
     } else {
@@ -411,7 +413,7 @@
     pid === blue && (seat = blue)
     
     if (seat) {
-      this.send('stand', this.id, seat, pid, function(err) {
+      this.send('stand', this.id, function(err) {
         err && self.notify(err)
       })
     }
@@ -419,19 +421,28 @@
   }
   Game.prototype.updateSeats = function() {
     var self = this
-    ;['red'
-    , 'blue'
-    ].forEach(function(player) {
-      if (self[player]) {
-        self['$' + player + 'Seat']
-          .attr('disabled', 'disabled')
-          .html('<i class="icon icon-user"></i>')
-      } else {
-        self['$' + player + 'Seat']
-          .removeAttr('disabled')
-          .html('Sit')
+      , pid = this.pid
+      , red = this.red
+      , blue = this.blue
+
+    // Both players sitting
+    if (red && blue) {
+      this.$sit.hide()
+    // One player sitting
+    } else if (red || blue) {
+      // Someone else sitting
+      if (pid !== blue && pid !== red) {
+        this.$el.find('#blue-player .player').show()
       }
-    })
+    // No players sitting
+    } else {
+      this.$el.find('.player').hide()
+      this.$sit.show()
+      this.$stand.hide()
+    }
+    if (this.isSitting) {
+      this.$stand.show()
+    }
     return this
   }
   Game.prototype.fail = function() {

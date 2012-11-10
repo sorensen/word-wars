@@ -43,13 +43,13 @@ function ioMain(socket) {
     if (clients.length === 1) io.sockets.in(room).emit('start')
   })
 
-  socket.on('sit', function (roomId, seat, playerId) {
+  socket.on('sit', function (roomId) {
     var room = getRoom(socket)
     if (room) {
       io.sockets.in(room).emit('sat', seat, playerId)
     }
   })
-  socket.on('stand', function (roomId, seat, playerId) {
+  socket.on('stand', function (roomId) {
     var room = getRoom(socket)
     if (room) {
       io.sockets.in(room).emit('stood', seat, playerId)

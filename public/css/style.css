@@ -399,7 +399,12 @@ html, body {
     background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #ffffff));
   }
 
-.sit {  
+
+#sit, #stand, #game .player {
+  display: none;
+}
+
+.expand {  
   position: absolute;
   left: 10px;
   right: 10px;
