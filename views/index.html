@@ -18,6 +18,7 @@
     <div id="header">
       <div id="logo">word battle</div>
       <!--<div id="spacer"></div>-->
+      <div id="notification"></div>
     </div>
 
     <div id="inner">
@@ -57,7 +58,7 @@
           </div>
 
           <div id="input-wrapper">
-            <input id="input" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
+            <input id="input" disabled="disabled" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
           </div>
         </div>
 
@@ -160,7 +161,10 @@
 
     </div>
 
-    <div id="modal"></div>
+    <div id="modal">
+      <div id="modal-inner"></div>
+    </div>
+    <div id="counter"></div>
 
     <div id="menu"><a id="home" class="box icon-home"></a><a id="games" class="box icon-globe"></a><a id="create" class="box icon-heart"></a></div>
 
@@ -175,6 +179,7 @@
   <script src="/socket.io/socket.io.js"></script> 
   <script src="/js/jquery-1.8.2.min.js"></script>
   <script src="/js/jquery-ui-1.9.1.custom.min.js"></script>
+  <script src="/js/jquery.countdown.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>

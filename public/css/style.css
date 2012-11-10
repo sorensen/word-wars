@@ -110,6 +110,7 @@ html, body {
   position: absolute;
   left: 0;
   right: 0;
+  overflow: hidden;
 }
 #wrapper {
   top: 0;
@@ -136,7 +137,7 @@ html, body {
 }
 #header {
   top: 5px;
-  height: 40px;
+  height: 50px;
 }
   #logo, #spacer {
   }
@@ -184,6 +185,7 @@ html, body {
     bottom: 0;
     left: 0;
     padding: 0 2%;
+    overflow-y: auto;
   }
     .sidebar .heart {
       position: absolute;
@@ -388,6 +390,89 @@ html, body {
   border-top: 1px solid #676767;
 }
 
+/* =============================================================================
+   Modal
+   ========================================================================== */
+
+#counter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -26px;
+  margin-top: -38px;
+  width: 53px;
+  height: 77px;
+  display: none;
+  z-index: 999;
+}
+#notification {
+  margin: 0 auto;
+  min-width: 400px;
+  height: 100%;
+  position: relative;
+  top: -50px;
+  text-align: center;
+  line-height: 50px;
+  height: 50px;
+  font-weight: bold;
+  background-color:#cccccc;
+  filter:progid:DXImageTransform.Microsoft.gradient(GradientType=1,startColorstr=#ffffff, endColorstr=#cccccc);
+  background-image:-moz-linear-gradient(left, #ffffff 0%, #cccccc 50%,#ffffff 100%);
+  background-image:linear-gradient(left, #ffffff 0%, #cccccc 50%,#ffffff 100%);
+  background-image:-webkit-linear-gradient(left, #ffffff 0%, #cccccc 50%,#ffffff 100%);
+  background-image:-o-linear-gradient(left, #ffffff 0%, #cccccc 50%,#ffffff 100%);
+  background-image:-ms-linear-gradient(left, #ffffff 0%, #cccccc 50%,#ffffff 100%);
+  background-image:-webkit-gradient(linear, left bottom, right bottom, color-stop(0%,#ffffff), color-stop(50%,#cccccc),color-stop(100%,#ffffff));
+  display: none;
+}
+#modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 200px;
+  margin-top: -100px;
+  margin-left: -200px;
+
+  border-radius: 10px;
+  background: #eeeeee;
+  border: 1px solid #cccccc;
+  z-index: 999;
+  display: none;
+}
+
+/* =============================================================================
+   Burst
+   ========================================================================== */
+
+.burst {
+  background: red;
+  width: 80px;
+  height: 80px;
+  position: relative;
+  text-align: center;
+}
+.burst:before, .burst:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 80px;
+  width: 80px;
+  background: red;
+}
+.burst:before {
+  -webkit-transform: rotate(30deg);
+     -moz-transform: rotate(30deg);
+      -ms-transform: rotate(30deg);
+       -o-transform: rotate(30deg);
+}
+.burst:after {
+  -webkit-transform: rotate(60deg);
+     -moz-transform: rotate(60deg);
+      -ms-transform: rotate(60deg);
+       -o-transform: rotate(60deg);
+}
 /* =============================================================================
    Danish woven heart -- https://gist.github.com/1051529
    ========================================================================== */

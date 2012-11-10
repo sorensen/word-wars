@@ -13,6 +13,7 @@ function ioMain(socket) {
   socket.on('join', function (room, cb) {
     var clients = io.sockets.clients(room)
 
+    console.log('join; ', room, clients)
     if (clients.length === 2) return cb('Room is full')
 
     socket.join(room)
@@ -28,6 +29,8 @@ function ioMain(socket) {
     var rooms = io.sockets.manager.roomClients[socket.id]
       , others = io.sockets.clients('test')
       , room = Object.keys(rooms)[1]
+
+    console.log('attack: ', word, room)
 
     if (!room) {
       return cb('Not in a room')
@@ -71,6 +74,7 @@ function ioMain(socket) {
         multi.sadd([room, 'currentwords'].join(':'), client.id + word)
       })
       multi.exec(function (err) {
+        console.log('checkAllWords: ', err, word, socket.id)
         io.sockets.in(room).emit('attack', word, socket.id)
       })
 
