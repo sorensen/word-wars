@@ -12,6 +12,7 @@
   #0099CC
   #4DB8DB
   #66C2E0
+  #CCEBF5
 
 */
 
@@ -28,6 +29,11 @@ a:hover .icon {
 .accordion-group {
   border: 0;
   border-radius: 0;
+  margin-bottom: 7pfx;
+}
+.accordion-inner {
+  border: 0;
+  background: #CCEBF5;
 }
 
 
@@ -64,7 +70,19 @@ body, input, button, textarea, select {
   padding: 10px;
   color: #001F29;
   line-height: 1;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
 }
+
+.accordion-inner div {
+  padding: 3px 0;
+}
+  .accordion-inner div + div {
+    border-top: 1px solid #B2E0F0;
+  }
 
 /* =============================================================================
    Layout
@@ -119,7 +137,7 @@ html, body {
     font-size: 45px;
     font-weight: bold;
     letter-spacing: -1px;
-    line-height: 1;
+    line-height: 50px;
   }
   #spacer {
     margin: 4px auto 0;
@@ -141,6 +159,16 @@ html, body {
   bottom: 65px;
   overflow-y: scroll;
 }
+  #battle-mode, #lobby-mode {
+    display: none;
+  }
+  #wrapper.battle #battle-mode {
+    display: block;
+  }
+  #wrapper.lobby #lobby-mode {
+    display: block;
+  }
+
   .sidebar {
     width: 21%;
     position: absolute;
@@ -191,7 +219,9 @@ html, body {
     overflow: hidden;
     position: absolute;
     top: 0;
-    bottom: 0;
+    bottom: 72px;
+    font-size: 25px;
+    border-top: 1px solid #bbbbbb;
     left: 0;
     width: 49.5%;
     border-radius: 3px;
@@ -209,7 +239,6 @@ html, body {
   }
   .board div {
     clear: both;
-    font-size: 25px;
     height: 9%;
     line-height: 1;
     text-align: center;
@@ -227,22 +256,73 @@ html, body {
     right: 0;
     padding: 0;
     margin: 0;
-  display: table-cell; 
-  vertical-align: middle; 
-  text-align: center; 
+    vertical-align: middle; 
+    text-align: center; 
   }
   .board div + div {
     /*border-top: 1px solid #ccc;*/
   }
 
+
+  .focus-player #player, .focus-opponent #opponent {
+    width: 69.5%;
+    font-size: 32px;
+  }
+  .focus-player #opponent, .focus-opponent #player {
+    width: 29.5%;
+    font-size: 16px;
+  }
+
+
   #input-wrapper {
-    position: absolute;
+    margin: 10px;
     bottom: 0;
+    position: absolute;
     right: 0;
     left: 0;
+
+    z-index: 3;
+    padding: 5px;
+    border: 1px solid #888888;
+    margin-top: -1px;
+
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    border-radius: 8px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #aaaaaa));
   }
   #input {
-    width: 100%;
+      text-align: center;
+      margin: 0;
+      width: 100%;
+      height: 50px;
+      border: none;
+      padding: 10px;
+      font: 200 30px/40px "Source Sans Pro",sans-serif;
+      color: rgba(255, 255, 255, 0.85);
+      color: rgba(0, 0, 0, 0.85);
+      outline: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      border: 1px solid #cfcfcf;
+
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      -ms-border-radius: 4px;
+      -o-border-radius: 4px;
+      border-radius: 4px;
+
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+
+      background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #ffffff));
   }
 
 #menu {
