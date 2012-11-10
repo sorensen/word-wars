@@ -157,14 +157,10 @@
   // Socket actions
   // --------------
 
-  Game.prototype.connect = function(room) {
+  Game.prototype.connect = function() {
     var self = this
 
     this.playerId = this.socket.socket.sessionid
-
-    this.send('join', this.id, function(e) {
-      console.log(e)
-    })
     this.listeners = [
       'used'
     , 'attack'
@@ -183,7 +179,10 @@
     this.socket.on('win', function () { self.won.apply(self, arguments) })
     this.socket.on('start', function () { self.start.apply(self, arguments) })
     this.socket.on('over', function () { self.over.apply(self, arguments) 
-
+      
+    this.send('join', this.id, function(e) {
+      console.log(e)
+    })
     return this
   }
   Game.prototype.send = function(action, word, fn) {
