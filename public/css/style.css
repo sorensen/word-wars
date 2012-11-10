@@ -177,6 +177,12 @@ html, body {
     left: 0;
     padding: 0 2%;
   }
+    .sidebar .heart {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      margin-left: -1.5em;
+    }
     .sidebar .icon {
       position: absolute;
       font-size: 33px;
@@ -244,7 +250,7 @@ html, body {
     text-align: center;
     display: table;
     width: 100%;
-    position: relative;
+    position: absolute;
   }
   .board div p {
     display: table-cell;
@@ -260,7 +266,6 @@ html, body {
     text-align: center; 
   }
   .board div + div {
-    /*border-top: 1px solid #ccc;*/
   }
 
 
@@ -299,30 +304,30 @@ html, body {
     background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #aaaaaa));
   }
   #input {
-      text-align: center;
-      margin: 0;
-      width: 100%;
-      height: 50px;
-      border: none;
-      padding: 10px;
-      font: 200 30px/40px "Source Sans Pro",sans-serif;
-      color: rgba(255, 255, 255, 0.85);
-      color: rgba(0, 0, 0, 0.85);
-      outline: none;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-      border: 1px solid #cfcfcf;
+    text-align: center;
+    margin: 0;
+    width: 100%;
+    height: 50px;
+    border: none;
+    padding: 10px;
+    font: 200 30px/40px "Source Sans Pro",sans-serif;
+    color: rgba(255, 255, 255, 0.85);
+    color: rgba(0, 0, 0, 0.85);
+    outline: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    border: 1px solid #cfcfcf;
 
-      -webkit-border-radius: 4px;
-      -moz-border-radius: 4px;
-      -ms-border-radius: 4px;
-      -o-border-radius: 4px;
-      border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
 
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
-      box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 
-      background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #ffffff));
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #ffffff));
   }
 
 #menu {
@@ -360,3 +365,70 @@ html, body {
   background: #ADB9BD;
   border-top: 1px solid #676767;
 }
+
+/* =============================================================================
+   Danish woven heart -- https://gist.github.com/1051529
+   ========================================================================== */
+
+.heart {
+  position: absolute;
+  width: 3em;
+  height: 3em;
+  font-size: 16px;
+}
+  .heart-left,
+  .heart-right {
+   -moz-border-radius: 100%;
+    -webkit-border-radius: 100%;
+    border-radius: 100%;
+    top: -30%;
+  }
+  .heart-left,
+  .heart-right,
+  .heart-bottom,
+  .heart-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+  }
+  .heart-left {
+    z-index: 4;
+    background: #0099CC;
+    left: -30%;
+   -moz-box-shadow: inset 0.1em 0.1em 0.1em #aaa, -1px -1px 0 #3d3d3d;
+    -webkit-box-shadow: inset 0.1em 0.1em 0.1em #aaa, -1px -1px 0 #3d3d3d;
+    box-shadow: inset 0.1em 0.1em 0.1em rgba(0, 0, 0, 0.3);
+  }
+  .heart-right {
+    z-index: 3;
+    background: #fff;
+    right: -30%;
+   -moz-box-shadow: inset -0.1em 0.1em 0.25em #aaa, -1px -1px 0 #3d3d3d;
+    -webkit-box-shadow: inset -0.1em 0.1em 0.25em #aaa, -1px -1px 0 #3d3d3d;
+    box-shadow: inset -0.1em 0.1em 0.25em rgba(0, 0, 0, 0.3);
+  }
+  .heart-content {
+    border-radius: 7% 0;
+    top: 0;
+    left: 0;
+    zoom: 1;
+    z-index: 4;
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);  
+    filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.7071067811865476, M12=-0.7071067811865475, M21=0.7071067811865475, M22=0.7071067811865476, sizingMethod='auto expand');
+
+    background-color: #fff;
+    background-image: 
+    -webkit-linear-gradient(45deg, #0099CC 25%, transparent 25%, transparent 75%, #0099CC 75%, #0099CC), 
+    -webkit-linear-gradient(45deg, #0099CC 25%, transparent 25%, transparent 75%, #0099CC 75%, #0099CC);
+    background-size: 2em 2em;
+    background-position: 0 0, 1em 1em;
+
+    -moz-box-shadow: inset -0.075em -0.075em 0.2em #bbb;
+    -webkit-box-shadow: inset -0.075em -0.075em 0.2em #bbb;
+    box-shadow: inset -0.075em -0.075em 0.2em #bbb;
+  }
