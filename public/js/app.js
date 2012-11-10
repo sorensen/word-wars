@@ -179,7 +179,7 @@
     this.socket.on('win', function () { self.won.apply(self, arguments) })
     this.socket.on('start', function () { self.start.apply(self, arguments) })
     this.socket.on('over', function () { self.over.apply(self, arguments) 
-      
+
     this.send('join', this.id, function(e) {
       console.log(e)
     })
@@ -306,14 +306,11 @@
 
   // Player has quit the game
   Game.prototype.quit = function() {
-<<<<<<< HEAD
-    for (var i = 0; i !== this.listeners.length; i++) {
-      this.socket.removeListener(this.listeners[i])
-    }
-=======
-    this.socket.emit('leave', this.room)
-    this.socket.off()
->>>>>>> 154ba1156f643847f0d8a7aaf529a03fd8f3353f
+    this.send('leave', this.id, function(e) {
+      for (var i = 0; i !== this.listeners.length; i++) {
+        this.socket.removeListener(this.listeners[i])
+      }
+    })
     return this.reset()
   }
 
