@@ -22,19 +22,23 @@ var computer = {
 
       rooms.forEach(function (room) {
         var started = me.rooms[room].started
-        var nextAttackWave = me.rooms[room].nextAttackWave
+        var thisTime = me.rooms[room].nextTime
+        var nextAttackWave = 1000 * (5 - (timeNow - started) / 30000)
         var key = [room, 'currentplayers'].join(':')
-        db.hkeys(key, gotUsers)
+        if (nextAttackWave < 1000) {
+          nextAttackWave = 1000
+        }
+        var nextTime = new Date().getTime() + nextAttackWave
+        if (new Date().getTime() > thisTime) {
+          db.hkeys(key, gotUsers)
+        }
         function gotUsers(err, users) {
           setTimeout(function () { 
             if (!me.rooms[room]) return
             autoAttack(room, me.word(), users[0], users[1])
             autoAttack(room, me.word(), users[1], users[0])
-            // hackity hackity hack
-            // 10 is the starting attack spawn interval
-            me.rooms[room].nextAttackWave = 10 - (timeNow - started) / 45000
-
-          }, me.rooms[room].nextAttackWave * 1000)
+            me.rooms[room].nextTime = nextTime
+          }, me.rooms[room].nextTime * 1000)
         }
       })
       function autoAttack(room, word, attacker, defender) {
@@ -46,7 +50,7 @@ var computer = {
   , beginAutoAttack : function (id) { 
       this.rooms[id] = { 
           started : new Date().getTime() 
-        , nextAttackWave : 5
+        , nextTime : new Date().getTime() + 5 * 1000
       }
   } 
   , stopAutoAttack : function (id) { 
@@ -63,7 +67,7 @@ var computer = {
 
 setInterval(function () {
   computer.tick()
-}, 5000)
+}, 500)
 
 function getRandomInt (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
