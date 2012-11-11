@@ -22,7 +22,8 @@ function ioMain(socket) {
     if (room) {
       socket.join(room)
       db.sadd('currentrooms', room)
-      return io.sockets.in(room).emit('join', socket.id)
+      io.sockets.in(room).emit('join', socket.id)
+      return cb(null, room)
     }
 
     getRooms(function (err, rooms) {
@@ -39,7 +40,8 @@ function ioMain(socket) {
 
       room = rooms[Math.floor(Math.random()*rooms.length)]
       socket.join(room.id)
-      return io.sockets.in(room.id).emit('join', socket.id)
+      io.sockets.in(room.id).emit('join', socket.id)
+      return cb(null, room.id)
     })
   })
 
@@ -87,7 +89,7 @@ function ioMain(socket) {
 
       Object.keys(players).forEach(function (key, i) {
         var player = players[key]
-          , ready  = player.split(':')[0]
+          , ready  = player.split(':')[0] === 'true' ? true : false
 
         playersReady[i] = ready
         if (key === socket.id) {
