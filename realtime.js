@@ -2,11 +2,44 @@
 var dictionary = require('./dictionary')
   , async      = require('async')
   , app, io, db
+  , redis = require('redis')
 
 module.exports = function (app) {
   io = app.settings.io
   db = app.settings.db
   io.sockets.on('connection', ioMain)
+  io.sockets.pub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
+  io.sockets.sub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
+  io.sockets.pub.auth(app.settings.redis.auth)
+  io.sockets.sub.auth(app.settings.redis.auth)
+}
+
+var computer = {
+    words : Object.keys(dictionary)
+  , rooms : {}
+  , tick : function () {
+      var me = this
+      Object.keys(me.rooms).forEach(function (room) {
+        io.sockets.in(room).emit('autoattack', me.word())
+      })
+  }
+  , beginAutoAttack : function (id) { 
+      this.rooms[id] = true
+  } 
+  , stopAutoAttack : function (id) { 
+      this.rooms[id] = null
+  }
+  , word : function () {
+    return this.words[getRandomInt(0, this.words.length)]
+  }
+}
+
+setInterval(function () {
+  computer.tick()
+}, 5000)
+
+function getRandomInt (min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getSessionId (socketid) {
@@ -15,6 +48,10 @@ function getSessionId (socketid) {
 
 function ioMain(socket) {
   var session = socket.handshake.session
+
+  io.sockets.sub.subscribe(session.id, io.sockets.in(session.id).emit.bind(io.sockets.in(session.id)))
+
+  socket.join(session.id)
 
   socket.on('getSession', function (socketid, cb) {
     db.get('sess:' + getSessionId(socketid), cb)
@@ -35,7 +72,9 @@ function ioMain(socket) {
     db.get('sess:'+session.id, function (err, user) {
       user = JSON.parse(user)
       user.name = name
-      db.set('sess:'+session.id, JSON.stringify(user), cb)
+      db.set('sess:'+session.id, JSON.stringify(user), function (err) {
+        io.sockets.pub.publish(session.id, 'setName', cb)
+      })
     })
   })
 
@@ -147,6 +186,7 @@ function ioMain(socket) {
 
     function setReady(err) {
       io.sockets.in(room).emit('ready', socket.id)
+      computer.beginAutoAttack(room)
       cb()
     }
   })
@@ -223,6 +263,7 @@ function ioMain(socket) {
 
   socket.on('disconnect', function () {
     var rooms = io.sockets.manager.roomClients[socket.id]
+    io.sockets.sub.unsubscribe(session.id)
     Object.keys(rooms).forEach(function (room) {
       if (room === '') return
       stand(room, socket)
@@ -317,7 +358,7 @@ function stand(room, socket, cb) {
 
   function removedSitting(err, res) {
     if (res === 0) return cb && cb('Not sitting in that room')
-
+    computer.stopAutoAttack(room)
     io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
     updateLobby()

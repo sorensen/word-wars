@@ -95,10 +95,11 @@
     , 'stood'
     , 'ready'
     ]
-    this.socket.on('used',    function () { self.usedWord.apply(self, arguments) })
-    this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })
+    this.socket.on('used',    function () { self.used.apply(self, arguments) })
+    this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
+    this.socket.on('autoattack',  function () { self.attack.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
-    this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
+    this.socket.on('block',   function () { self.block.apply(self, arguments) })
     this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
@@ -120,7 +121,7 @@
   Game.prototype.players = function() {
     return this
   }
-  Game.prototype.usedWord = function() {
+  Game.prototype.used = function() {
 
     return this
   }
@@ -131,11 +132,14 @@
   Game.prototype.attacked = function(word, id) {
     word = word.toLowerCase().trim()
 
-    var me = id === this.pid
-      , $el = me ? this.$blue : this.$red
+    // var currentPlayer = !!id // for auto attacking
+
+    var currentPlayer = (id === this.pid)
+
+    var $el = currentPlayer ? this.$blue : this.$red
       , $word = $('<div><p>' + word + '</p></div>')
 
-    if (me || this.getSeatByPlayer(id) === 'red') {
+    if (currentPlayer || this.getSeatByPlayer(id) === 'red') {
       this.opponentWords[word] = $word
     } else {
       this.playerWords[word] = $word
@@ -188,7 +192,7 @@
       })
     })
   }
-  Game.prototype.blocked = function(word, id) {
+  Game.prototype.block = function(word, id) {
     var me = id === this.pid
       , idx
 
@@ -219,7 +223,7 @@
       .countdown({
         stepTime: 60
       , format: 's'
-      , startTime: '5'
+      , startTime: '3'
       , digitImages: 6
       , digitWidth: 53
       , digitHeight: 77
@@ -437,7 +441,7 @@
   }
   Game.prototype.attack = function(word) {
     var self = this
-
+    if (!this.enabled) return
     this.send('attack', word, function (err) {
       if (err) {
         return self.notify(err)

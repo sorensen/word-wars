@@ -59,7 +59,7 @@
   // Socket connection handler
   Lobby.prototype.connect = function() {
     var self = this
-    this.Sessions = window.Sessions.display()
+    this.Sessions = new Sessions().display()
     this.HighScores = window.HighScores.display()
     self.getRooms()
     this.socket.on('updateLobby', function () {
