@@ -109,7 +109,6 @@
       if (e) return
       self.id = room.id
       self.room = room
-      console.log(room)
     })
     this.connected = true
     return this.updateSeats()
@@ -136,7 +135,7 @@
       , $el = me ? this.$blue : this.$red
       , $word = $('<div><p>' + word + '</p></div>')
 
-    if (me) {
+    if (me || this.getSeatByPlayer(id) === 'red') {
       this.opponentWords[word] = $word
     } else {
       this.playerWords[word] = $word
@@ -152,9 +151,6 @@
   }
   Game.prototype.word = function($word, $el) {
     var timeout = 1500
-      , height = $el.height()
-      , ten = height / 10
-      , idx = $el.children().length
 
     $({
       position: 0
@@ -164,22 +160,24 @@
       duration: timeout
     , step: function (position) {
         var idx = $word.index() * 10
-        console.log($word.index(), idx, position)
         if (position > (90 - idx)) position = 90 - idx
         $word.css({top: position + '%'})
       }
     })
   }
-  Game.prototype.reStack = function ($el) {
+  Game.prototype.reStack = function ($el, idx) {
     var timeout = 1500
     $el.children().each(function () {
       var $word = $(this)
-        , start = $word.index() * 10
+        , wordIdx = $word.index()
+        , start = 90 - wordIdx * 10
+        , end   = start + 90
 
+      if (idx - 1 >= wordIdx) return
       $({
         position: start
       }).animate({
-        position: start + 90
+        position: end
       }, {
         duration: timeout
       , step: function (position) {
@@ -192,19 +190,22 @@
   }
   Game.prototype.blocked = function(word, id) {
     var me = id === this.pid
+      , idx
 
     word = word.toLowerCase().trim()
 
-    if (me) {
+    if (me || this.getSeatByPlayer(id) === 'red') {
+      idx = this.playerWords[word].index()
       this.playerWords[word].remove()
       delete this.playerWords[word]
-      this.reStack(this.$red)
+      this.reStack(this.$red, idx)
     } else {
+      idx = this.opponentWords[word].index()
       this.opponentWords[word].remove()
       delete this.opponentWords[word]
-      this.reStack(this.$blue)
+      this.reStack(this.$blue, idx)
     }
-    return this.stack()
+    return this
   }
   // Start game, display countdown
   Game.prototype.start = function() {

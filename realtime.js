@@ -119,32 +119,30 @@ function ioMain(socket) {
     db.hgetall(key, getPlayers)
 
     function getPlayers(err, players) {
-      if (!players[socket.id]) return cb('Not sitting in room')
+      if (!players || !players[socket.id]) return cb('Not sitting in room')
 
-      var playersReady = []
+      var playersReady = false
+        , player = players[socket.id].split(':')
+        , playerKeys = Object.keys(players)
+        , length = playerKeys.length
         , otherPlayer
-        , thisPlayer
+        , otherKey
 
-      Object.keys(players).forEach(function (key, i) {
-        var player = players[key]
-          , ready  = player.split(':')[0] === 'true' ? true : false
-
-        playersReady[i] = ready
-        if (key === socket.id) {
-          playersReady[i] = true
-          thisPlayer = true + ':' + player.split(':')[1]
-        } else {
-          otherPlayer = [key, false + ':' + player.split(':')[1]]
+      playerKeys.forEach(function (key) {
+        if (key !== socket.id) {
+          otherPlayer = players[key].split(':')
+          otherKey = key
         }
       })
 
-      if (playersReady[0] && playersReady[1]) startGame(room)
-
-      if (otherPlayer) {
-        db.hset(key, otherPlayer[0], otherPlayer[1], setReady)
-      } else {
-        db.hset(key, socket.id, thisPlayer, setReady)
+      if (length === 2 && otherPlayer && otherPlayer[0] === 'true') {
+        startGame(room)
+        otherPlayer[0] = false
+        return db.hset(key, otherKey, otherPlayer.join(':'), setReady)
       }
+
+      player[0] = true
+      db.hset(key, socket.id, player.join(':'), setReady)
     }
 
     function setReady(err) {
