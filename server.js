@@ -17,6 +17,6 @@ server.listen(app.settings.port, function () {
 
 
 // Catch all exceptions
-process.on('uncaughtException', function(err) {
-  console.log('UNCAUGHT EXCEPTION: ', err.message, err.type, err.stack)
-})
+// process.on('uncaughtException', function(err) {
+//   console.log('UNCAUGHT EXCEPTION: ', err.message, err.type, err.stack)
+// })
