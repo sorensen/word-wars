@@ -1,6 +1,6 @@
 {
   "name": "nko3-candy-wars",
-  "version": "0.0.1-10",
+  "version": "0.0.1-11",
   "description": "Words",
   "main": "server.js",
   "directories": {

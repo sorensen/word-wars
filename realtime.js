@@ -315,7 +315,7 @@ function attack(room, word, attacker, defender, cb, auto) {
       if (word[0] !== attacker) length += 1
     })
 
-    if (auto && length >= 8) return cb()
+    if (auto && length >= 5) return cb()
 
     db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
   }
