@@ -93,6 +93,7 @@ function ioMain(socket) {
       if (!players[socket.id]) return cb('Not sitting in room')
 
       var playersReady = []
+        , otherPlayer
         , thisPlayer
 
       Object.keys(players).forEach(function (key, i) {
@@ -102,15 +103,19 @@ function ioMain(socket) {
         playersReady[i] = ready
         if (key === socket.id) {
           playersReady[i] = true
-          thisPlayer = player.split(':')
-          thisPlayer[0] = true
-          thisPlayer = thisPlayer.join(':')
+          thisPlayer = true + ':' + player.split(':')[1]
+        } else {
+          otherPlayer = [key, false + ':' + player.split(':')[1]]
         }
       })
 
       if (playersReady[0] && playersReady[1]) startGame(room)
 
-      db.hset(key, socket.id, thisPlayer, setReady)
+      if (otherPlayer) {
+        db.hset(key, otherPlayer[0], otherPlayer[1], setReady)
+      } else {
+        db.hset(key, socket.id, thisPlayer, setReady)
+      }
     }
 
     function setReady(err) {
@@ -297,9 +302,7 @@ function resetReady(room, cb) {
 }
 
 function startGame(room) {
-  resetReady(room, function() {
-    io.sockets.in(room).emit('start')
-  })
+  io.sockets.in(room).emit('start')
 }
 
 function endGame(room) {
