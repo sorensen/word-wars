@@ -42,14 +42,14 @@
 
     this.$el.on('click', '.join', function(e) {
       var $button = $(this)
-        , $parent = $button.parent()
+        , $parent = $button.parent().parent()
         , id = $parent.data('id')
 
       self.join(id, $parent)
     })
     this.$el.on('click', '.play', function(e) {
       var $button = $(this)
-        , $parent = $button.parent()
+        , $parent = $button.parent().parent()
         , id = $parent.data('id')
 
       self.join(id, $parent, true)
@@ -78,9 +78,12 @@
       window.players = players
       self.getRooms()
     })
-    this.socket.on('updateLobby', function () {
+    this.socket.on('updateLobby', function (rooms) {
       // self.HighScores.display()
-      self.getRooms()
+      self.$gameList.empty()
+      rooms.forEach(function (room) {
+        self.render(room)
+      })
     })
     this.socket.on('players', function(players) {
       window.players = players
