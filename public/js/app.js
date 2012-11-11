@@ -206,7 +206,6 @@
     , 'lose'
     , 'win'
     , 'start'
-    , 'over'
     ]
     this.socket.on('used',    function () { self.usedWord.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })
@@ -215,7 +214,6 @@
     this.socket.on('lose',    function () { self.lost.apply(self, arguments) })
     this.socket.on('win',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
-    // this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
     this.socket.on('stood',   function () { self.stood.apply(self, arguments) })
 
@@ -328,11 +326,11 @@
   }
   Game.prototype.won = function() {
 
-    return this.clearBoard()
+    return this.over()
   }
   Game.prototype.lost = function() {
 
-    return this.clearBoard()
+    return this.over()
   }
   Game.prototype.over = function() {
 
