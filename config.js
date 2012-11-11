@@ -53,12 +53,15 @@ module.exports = function (app) {
   io.configure(function () {
     var RedisStore = sio.RedisStore
 
-    var redisPubSub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
-    redisPubSub.auth(app.settings.redis.auth)
+    var redisPub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
+      , redisSub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
+    redisPub.auth(app.settings.redis.auth)
+    redisSub.auth(app.settings.redis.auth)
 
     io.set('store', new RedisStore({
-        redisPub: redisPubSub
-      , redisSub: redisPubSub
+        redis: redis
+      , redisPub: redisPub
+      , redisSub: redisSub
       , redisClient: app.settings.db
     }))
     
