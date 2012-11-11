@@ -20,8 +20,21 @@ var computer = {
   , length : 6
   , tick : function () {
       var me = this
-      Object.keys(me.rooms).forEach(function (room) {
-        io.sockets.in(room).emit('autoattack', me.word())
+        , rooms = Object.keys(me.rooms)
+
+      rooms.forEach(function (room) {
+        var key = [room, 'currentplayers'].join(':')
+
+        db.hkeys(key, gotUsers)
+
+        function gotUsers(err, users) {
+          var idx = getRandomInt(0, users.length)
+            , attacker = users[idx]
+            , defender = users[idx === 0 ? 1 : 0]
+          attack(room, me.word(), attacker, defender, function (err) {
+            if (err) gotUsers(null, users)
+          })
+        }
       })
   }
   , beginAutoAttack : function (id) { 
@@ -242,38 +255,9 @@ function ioMain(socket) {
           return cb(null)
         }
 
-        db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+        attack(room, word, socket.id, otherPlayer, cb)
       }
 
-      function checkAllWords(err, res) {
-        if (err) return cb('Error checking word')
-
-        if (res === 0) {
-          return cb('Word was already played')
-        }
-
-        var key = [room, 'currentwords'].join(':')
-        db.multi()
-          .sadd(key, otherPlayer + ':' + word)
-          .smembers(key, gotCount)
-          .exec()
-      }
-
-      function gotCount(err, words) {
-        words || (words = [])
-        var length = 0
-        words.forEach(function (word) {
-          word = word.split(':')
-          if (word[0] !== socket.id) length += 1
-        })
-        if (length > 10) {
-          io.sockets.in(room).emit('won', socket.id)
-          clearRoom(room)
-        } else {
-          io.sockets.in(room).emit('attack', word, socket.id)
-        }
-        cb(null)
-      }
     }
   })
 
@@ -284,6 +268,40 @@ function ioMain(socket) {
       stand(room, socket)
     })
   })
+}
+
+function attack(room, word, attacker, defender, cb) {
+  db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+
+  function checkAllWords(err, res) {
+    if (err) return cb('Error checking word')
+
+    if (res === 0) {
+      return cb('Word was already played')
+    }
+
+    var key = [room, 'currentwords'].join(':')
+    db.multi()
+      .sadd(key, defender + ':' + word)
+      .smembers(key, gotCount)
+      .exec()
+  }
+
+  function gotCount(err, words) {
+    words || (words = [])
+    var length = 0
+    words.forEach(function (word) {
+      word = word.split(':')
+      if (word[0] !== attacker) length += 1
+    })
+    if (length > 10) {
+      io.sockets.in(room).emit('won', attacker)
+      clearRoom(room)
+    } else {
+      io.sockets.in(room).emit('attack', word, attacker)
+    }
+    cb(null)
+  }
 }
 
 function getRoom(room, cb) {
