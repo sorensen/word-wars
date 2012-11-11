@@ -100,6 +100,9 @@
     , 'ready'
     , 'over'
     ]
+    for (var i = 0; i !== self.listeners.length; i++) {
+      self.socket.removeAllListeners(self.listeners[i])
+    }
     this.socket.on('used',    function () { self.used.apply(self, arguments) })
     this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
@@ -151,6 +154,8 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
+
+    $('#is-ready-overlay').hide()
     word = word.toLowerCase().trim()
 
     var $word = $('<div><p>' + word + '</p></div>')
@@ -275,6 +280,10 @@
     }
     $('#blue-player .player-name span').html(getPlayerName(otherSeat))
 
+    this.clearBoard()
+
+    if (this.room.playing && !this.isSitting) return
+
     this.$counter
       .show()
       .countdown({
@@ -286,12 +295,18 @@
       , digitHeight: 77
       , timerEnd: function() {
           self.$counter.html('').hide()
-          self
-            .clearBoard()
-            .enableInput()
+          self.clearBoard()
+          self.enableInput()
+          $('#is-ready-overlay').hide()
+          setTimeout(function() {
+
+            $('#is-ready-overlay').hide()
+          }, 2000)
         }
       , image: imgPath
       })
+
+    $('#is-ready-overlay').hide()
     return this
   }
   Game.prototype.enableInput = function() {
@@ -395,7 +410,7 @@
     return this.seats[this.getSeat(seat)]
   }
   Game.prototype.playerReady = function(pid) {
-    if (pid !== this.pid) {
+    if (pid !== this.pid && !this.gameStarted) {
       this.$isReadyOverlay.show()
     }
     return this
@@ -437,6 +452,8 @@
   }
   Game.prototype.updateWords = function() {
     var self = this
+
+    if (this.room.playing) this.start()
 
     this.room.players.forEach(function (player) {
       var seat = player.seat
@@ -481,10 +498,9 @@
     $('.player strong').html('')
     $('#red-player .player').hide()
 
-    console.log('updateSeats: ', pid, red, blue)
-
     // Both players sitting
     if (red && blue) {
+      $('#vs').show()
       this.$sit.hide()
       var forOther = blue
       if (pid === blue) {
@@ -542,6 +558,8 @@
     this.blueWords = {}
     $('.spaces-left').html('10')
     $('.word-list').html('')
+    $('#is-ready-overlay').hide()
+    $('#vs').hide()
     return this
   }
   Game.prototype.attack = function(word) {

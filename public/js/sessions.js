@@ -40,7 +40,6 @@
     }
     , display : function () {
         var me = this
-        console.log('display name')
         this.getSession(function (session) {
           if (!session.name) me.setName('anonymous')
           else me.$el.html('<i>' + me.current.name || session.name + '</i> <small class="icon icon-edit"></small>')
