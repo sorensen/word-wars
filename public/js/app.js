@@ -559,6 +559,7 @@
     $('.spaces-left').html('10')
     $('.word-list').html('')
     $('#is-ready-overlay').hide()
+    $('.player-name').hide()
     $('#vs').hide()
     return this
   }
