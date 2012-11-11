@@ -2,46 +2,32 @@
 <html>
 <head>
   <title>Word Wars</title>
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/font-awesome.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel='stylesheet' href='/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='/css/font-awesome.css'>
+  <link rel='stylesheet' href='/css/style.css'>
+  <link rel='stylesheet' href='/css/words-game.css'>
 </head>
 <body>
-  <div id="wrapper" class="lobby">
-    <div id="top" class="color-strip">
-      <div class="color-1"></div>
-      <div class="color-2"></div>
-      <div class="color-3"></div>
-      <div class="color-4"></div>
+  <div id='wrapper' class='lobby'>
+    <div id='top' class='color-strip'>
+      <div class='color-1'></div>
+      <div class='color-2'></div>
+      <div class='color-3'></div>
+      <div class='color-4'></div>
     </div>
 
-    <div id="header">
-      <div id="logo">word battle</div>
-      <!--<div id="spacer"></div>-->
-      <div id="notification"></div>
+    <div id='header'>
+      <div id='logo'>word battle</div>
+      <!--<div id='spacer'></div>-->
+      <div id='notification'></div>
     </div>
-
-    <div id="inner">
+    <div id='inner'>
 
       <!-- Game lobby -->
-      <div id="lobby-mode">
-        <div style="text-align: center">
-          <button class="join-room btn btn-info btn-large">Join/Create Public Room</button>
-          <button class="create-room btn btn-info btn-large">Create Private Room</button>
-        </div>
-        <!--
-        <div class="game">
-          <button class="join btn btn-info btn-small" data-room="test">Join</button>
+      <div class='lobby-mode'></div>
 
-          <div class="host"><span>Host:</span> Some Host</div>
-          <div class="blue-player"><span>Player:</span> Player 1</div>
-          <div class="watchers"><span>Watchers:</span> 5</div>
-          <div class="words"><span>Words:</span> 80</div>
-        </div>
-        -->
-
-      </div>
-
+      <ul class='high-scores'></ul>
+      
       <!-- Word battle screen -->
       <div id="battle-mode">
         <div id="game" class="focus-">
@@ -165,18 +151,37 @@
 
     </div>
 
-    <div id="modal">
-      <div id="modal-inner"></div>
+    <div id='modal'>
+      <div id='modal-inner'></div>
     </div>
-    <div id="counter"></div>
 
-    <div id="menu"><a id="home" class="box icon-home"></a><a id="games" class="box icon-globe"></a><a id="create" class="box icon-heart"></a></div>
+    <div id='counter'></div>
 
-    <div id="bottom" class="color-strip">
-      <div class="color-4"></div>
-      <div class="color-3"></div>
-      <div class="color-2"></div>
-      <div class="color-1"></div>
+    <div id='menu'>
+      <a id="fullscreen" class="box icon icon-resize-full"></a>
+
+      <a id='games' href='/' title='Open Rooms' class='box icon icon-globe'>
+      </a>
+
+      <a title='Private Room' class='join-room box icon icon-key'>
+      </a>
+
+      <a title='Random Room' class='join-room box icon icon-plus'>
+      </a>
+
+    </div>
+
+    <div id='session-bar'>
+      <div class=''>
+        <h4><i>???</i></h4>
+      </div>
+    </div>
+
+    <div id='bottom' class='color-strip'>
+      <div class='color-4'></div>
+      <div class='color-3'></div>
+      <div class='color-2'></div>
+      <div class='color-1'></div>
     </div>
 
   </div>
@@ -189,5 +194,10 @@
   <script src="/js/bootstrap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
+  
+  <script src='/js/lobby.js'></script>
+  <script src='/js/highScores.js'></script>
+  <script src='/js/sessions.js'></script>
+  <script src='/bundle.views.js'></script>
 </body> 
 </html>

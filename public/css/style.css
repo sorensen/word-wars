@@ -143,16 +143,16 @@ html, body {
   #battle-mode {
     display: none;
   }
-  .battle .lobby-mode {
+  .battle .lobby-mode, .battle .high-scores {
     display: none;
   }
-  .lobby .lobby-mode {
+  .lobby .lobby-mode, .lobby .high-scores {
     display: block;
   }
   #wrapper.battle #battle-mode {
     display: block;
   }
-  #wrapper.lobby .lobby-mode {
+  #wrapper.lobby .lobby-mode, #wrapper.lobby .high-scores {
     display: block;
   }
 

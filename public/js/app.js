@@ -36,7 +36,9 @@
     this.$sit = $('#sit')
     this.$stand = $('#stand')
     this.$ready = $('#ready')
+    this.$gameOverlay = $('#game-overlay')
     this.$readyOverlay = $('#ready-overlay')
+    this.$isReadyOverlay = $('#is-ready-overlay')
 
     this.reset()
     // Permanently focus the game input
@@ -87,25 +89,27 @@
     , 'attack'
     , 'players'
     , 'block'
-    , 'lose'
-    , 'win'
+    , 'won'
     , 'start'
-    , 'over'
+    , 'sat'
+    , 'stood'
+    , 'ready'
     ]
     this.socket.on('used',    function () { self.usedWord.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
     this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
-    this.socket.on('lose',    function () { self.lost.apply(self, arguments) })
-    this.socket.on('win',     function () { self.won.apply(self, arguments) })
+    this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
-    // this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
     this.socket.on('stood',   function () { self.stood.apply(self, arguments) })
+    this.socket.on('ready',   function () { self.playerReady.apply(self, arguments) })
 
     this.send('join', this.id, function(e, room) {
       if (e) return
-      self.id = room
+      self.id = room.id
+      self.room = room
+      console.log(room)
     })
     this.connected = true
     return this.updateSeats()
@@ -152,39 +156,38 @@
       , ten = height / 10
       , idx = $el.children().length
 
-    $({position: 0}).animate(
-        {
-          position: 90
-        }
-      , {
-            duration: timeout
-          , step: function (position) {
-              var idx = $word.index() * 10
-              console.log($word.index(), idx, position)
-              if (position > (90 - idx)) position = 90 - idx
-              $word.css({top: position + '%'})
-            }
-        }
-    )
+    $({
+      position: 0
+    }).animate({
+      position: 90
+    }, {
+      duration: timeout
+    , step: function (position) {
+        var idx = $word.index() * 10
+        console.log($word.index(), idx, position)
+        if (position > (90 - idx)) position = 90 - idx
+        $word.css({top: position + '%'})
+      }
+    })
   }
   Game.prototype.reStack = function ($el) {
     var timeout = 1500
     $el.children().each(function () {
       var $word = $(this)
-      var start = $word.index() * 10
-      $({position: start}).animate(
-          {
-            position: start + 90
-          }
-        , {
-              duration: timeout
-            , step: function (position) {
-                var idx = $word.index() * 10
-                if (position > (90 - idx)) position = 90 - idx
-                $word.css({top: position + '%'})
-              }
-          }
-      )
+        , start = $word.index() * 10
+
+      $({
+        position: start
+      }).animate({
+        position: start + 90
+      }, {
+        duration: timeout
+      , step: function (position) {
+          var idx = $word.index() * 10
+          if (position > (90 - idx)) position = 90 - idx
+          $word.css({top: position + '%'})
+        }
+      })
     })
   }
   Game.prototype.blocked = function(word, id) {
@@ -206,9 +209,10 @@
   // Start game, display countdown
   Game.prototype.start = function() {
     var self = this
-    if (this.isSitting) {
-      this.isPlaying = true
-    }
+    this.isPlaying = this.isSitting
+      ? true
+      : false
+
     this.$counter
       .show()
       .countdown({
@@ -238,17 +242,36 @@
     this.$input.attr('disabled', 'disabled')
     return this
   }
-  Game.prototype.won = function() {
+  Game.prototype.won = function(pid) {
+    var self = this
+      , me = this.pid === pid
+      , msg
 
-    return this.clearBoard()
-  }
-  Game.prototype.lost = function() {
+    this.notify('Player ' + pid + ' won!')
 
-    return this.clearBoard()
+    if (this.isPlaying) {
+      msg = me
+        ? 'Victory'
+        : 'Defeat'
+
+      this.$gameOverlay.show().html(msg)
+      this.clearBoard()
+
+      this.tick = setTimeout(function() {
+        self.$gameOverlay
+          .html('Game Over')
+          .fadeOut(5000, function() {
+            self.over()
+          })
+      }, 5 * 1000)
+    }
+    return this
   }
   Game.prototype.over = function() {
 
-    return this.clearBoard()
+    return this
+      .clearBoard()
+      .updateSeats()
   }
   // Player has quit the game
   Game.prototype.quit = function() {
@@ -267,7 +290,6 @@
     return this.reset()
   }
   Game.prototype.sat = function(id, seat) {
-    console.log('sat: ', id, seat)
     if (id === this.pid) {
       this.isSitting = true
     }
@@ -297,6 +319,12 @@
   }
   Game.prototype.getPlayer = function(seat) {
     return this.seats[this.getSeat(seat)]
+  }
+  Game.prototype.playerReady = function(pid) {
+    if (pid !== this.pid) {
+      this.$isReadyOverlay.show()
+    }
+    return this
   }
 
   // Game actions
@@ -329,7 +357,7 @@
     var self = this
     console.log('ready!')
       self.$readyOverlay.show()
-    this.send('ready', this.id, function(err) {
+    this.send('playerReady', this.id, function(err) {
       err && self.notify(err)
     })
     return this
@@ -341,7 +369,6 @@
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
 
-    console.log('updateSeats: ', pid, red, blue)
     // Both players sitting
     if (red && blue) {
       this.$sit.hide()
@@ -377,6 +404,7 @@
 
     return this
   }
+
   Game.prototype.win = function() {
 
     return this
@@ -388,6 +416,7 @@
     this.$stand.hide()
     this.$ready.hide()
     this.$readyOverlay.hide()
+    this.$isReadyOverlay.hide()
     $('.word-list').html('')
     return this
   }
