@@ -168,31 +168,6 @@ function ioMain(socket) {
 
         db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
       }
-<<<<<<< HEAD
-      var othersArray = others.map(function (client) {
-        return client.id + word
-      })
-      var key = [room, 'currentwords'].join(':')
-
-      db.sadd(key, othersArray, function (err) {
-        db.scard(key, function (err, length) {
-          if (length > 10) {
-            io.sockets.in(room).emit('won', socket.id)
-          } else {
-            io.sockets.in(room).emit('attack', word, socket.id)
-          }
-        })
-      })
-      cb(null)
-      return
-
-      var multi = db.multi()
-      multi.sadd([room, 'currentwords'].join(':'), othersArray)
-      multi.exec(function (err) {
-        io.sockets.in(room).emit('attack', word, socket.id)
-      })
-      cb(null)
-=======
 
       function checkAllWords(err, res) {
         if (err) return cb('Error checking word')
@@ -201,15 +176,21 @@ function ioMain(socket) {
           return cb('Word was already played')
         }
 
-        db.sadd([room, 'currentwords'].join(':'), otherPlayer + word, savedAttack)
+        var key = [room, 'currentwords'].join(':')
+        db.multi()
+          .sadd(key, otherPlayer + word)
+          .scard(key, gotCount)
+          .exec()
       }
 
-      function savedAttack(err) {
-        console.log('checkAllWords: ', err, word, socket.id)
-        io.sockets.in(room).emit('attack', word, socket.id)
+      function gotCount(err, length) {
+        if (length > 10) {
+          io.sockets.in(room).emit('won', socket.id)
+        } else {
+          io.sockets.in(room).emit('attack', word, socket.id)
+        }
         cb(null)
       }
->>>>>>> a6725debd3d71e17f84ad0c45b0fe9f9eb7b2868
     }
   })
 
@@ -224,10 +205,9 @@ function ioMain(socket) {
   })
 }
 
-<<<<<<< HEAD
 function winLose(room) {
+}
 
-=======
 function getRoom(room, cb) {
   var clients = io.sockets.manager.rooms['/' + room]
   var roomObj = {
@@ -260,7 +240,6 @@ function getRoom(room, cb) {
 
     cb(null, roomObj)
   }
->>>>>>> a6725debd3d71e17f84ad0c45b0fe9f9eb7b2868
 }
 
 function getRooms(cb) {
