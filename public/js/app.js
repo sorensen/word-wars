@@ -316,12 +316,12 @@
       msg = getPlayerName(pid) + ' won'
     }
 
-    this.$gameOverlay.show().html(msg)
+    this.$gameOverlay.show().html('<span>' + msg + '</span>')
     this.clearBoard()
 
     this.tick = setTimeout(function() {
       self.$gameOverlay
-        .html('Game Over')
+        .html('<span>Game Over</span>')
         .fadeOut(5000, function() {
           self.over()
         })
@@ -439,7 +439,7 @@
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
     
-    $('.player span').html('')
+    $('.player strong').html('')
     $('#red-player .player').hide()
 
     console.log('updateSeats: ', pid, red, blue)
@@ -451,9 +451,9 @@
       if (pid === blue) {
         forOther = red
       }
-      $other.show().find('span').html(getPlayerName(forOther))
+      $other.show().find('strong').html(getPlayerName(forOther))
       if (!this.isSitting) {
-        $('#red-player .player').show().find('span').html(getPlayerName(red))
+        $('#red-player .player').show().find('strong').html(getPlayerName(red))
       }
     // One player sitting
     } else if (red || blue) {
@@ -463,7 +463,7 @@
         this.$sit.hide()
       // Someone else is sitting
       } else {
-        $other.show().find('span').html(getPlayerName(red || blue))
+        $other.show().find('strong').html(getPlayerName(red || blue))
         this.$sit.show()
         this.$ready.hide()
         this.$stand.hide()
