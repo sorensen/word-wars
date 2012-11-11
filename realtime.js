@@ -17,12 +17,24 @@ var computer = {
   , tick : function () {
       var me = this
         , rooms = Object.keys(me.rooms)
+
+      var timeNow = new Date().getTime()
+
       rooms.forEach(function (room) {
+        var started = me.rooms[room].started
+        var nextAttackWave = me.rooms[room].nextAttackWave
         var key = [room, 'currentplayers'].join(':')
         db.hkeys(key, gotUsers)
         function gotUsers(err, users) {
-          autoAttack(room, me.word(), users[0], users[1])
-          autoAttack(room, me.word(), users[1], users[0])
+          setTimeout(function () { 
+            console.log('auto attack', me.rooms[room].nextAttackWave)
+            autoAttack(room, me.word(), users[0], users[1])
+            autoAttack(room, me.word(), users[1], users[0])
+            // hackity hackity hack
+            // 10 is the starting attack spawn interval
+            me.rooms[room].nextAttackWave = 10 - (timeNow - started) / 45000
+
+          }, me.rooms[room].nextAttackWave * 1000)
         }
       })
       function autoAttack(room, word, attacker, defender) {
@@ -32,7 +44,10 @@ var computer = {
       }
   }
   , beginAutoAttack : function (id) { 
-      this.rooms[id] = true
+      this.rooms[id] = { 
+          started : new Date().getTime() 
+        , nextAttackWave : 5
+      }
   } 
   , stopAutoAttack : function (id) { 
       delete this.rooms[id]
