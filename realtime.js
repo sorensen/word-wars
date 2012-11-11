@@ -279,14 +279,25 @@ function stand(room, socket, cb) {
   }
 }
 
-function clearReady(room, cb) {
-  db.del(room + ':readyplayers', function(err) {
-    cb && cb()
-  })
+function resetReady(room, cb) {
+  var key = [room, 'currentplayers'].join(':')
+
+  db.hgetall(key, getPlayers)
+
+  function getPlayers(err, players) {
+    Object.keys(players).forEach(function (key, i) {
+      var player = players[key]
+        , values = player.split(':')
+
+      players[key] = false + ':' + values[1]
+    })
+
+    db.hmset(key, players, cb)
+  }
 }
 
 function startGame(room) {
-  clearReady(room, function() {
+  resetReady(room, function() {
     io.sockets.in(room).emit('start')
   })
 }
