@@ -256,6 +256,7 @@ function ioMain(socket) {
       }
 
       function gotCount(err, words) {
+        words || (words = [])
         var length = 0
         words.forEach(function (word) {
           word = word.split(':')

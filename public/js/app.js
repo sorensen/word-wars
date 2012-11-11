@@ -94,8 +94,10 @@
     , 'sat'
     , 'stood'
     , 'ready'
+    , 'over'
     ]
     this.socket.on('used',    function () { self.used.apply(self, arguments) })
+    this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
     this.socket.on('autoattack',  function () { self.attack.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
@@ -233,6 +235,8 @@
       ? true
       : false
 
+    this.gameStarted = true
+
     this.$counter
       .show()
       .countdown({
@@ -242,7 +246,7 @@
       , digitImages: 6
       , digitWidth: 53
       , digitHeight: 77
-      , timerEnd: function() { 
+      , timerEnd: function() {
           self.$counter.html('').hide()
           self
             .clearBoard()
@@ -263,7 +267,6 @@
     return this
   }
   Game.prototype.won = function(pid) {
-    console.log('WON: ', pid)
     var self = this
       , me = this.pid === pid
       , msg
@@ -289,9 +292,13 @@
     return this
   }
   Game.prototype.over = function() {
+    if (this.gameStarted) {
 
+    }
+    this.gameStarted = false
     return this
       .clearBoard()
+      .disableInput()
       .updateSeats()
   }
   // Player has quit the game

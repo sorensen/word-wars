@@ -14,3 +14,9 @@ require('./realtime')(app)
 server.listen(app.settings.port, function () {
   console.log('Express server started on port: ' + app.settings.port)
 })
+
+
+// Catch all exceptions
+process.on('uncaughtException', function(err) {
+  console.log('UNCAUGHT EXCEPTION: ', err.message, err.type, err.stack)
+})
