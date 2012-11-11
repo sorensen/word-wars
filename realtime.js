@@ -450,3 +450,29 @@ function clearRoom(room) {
     updateLobby()
   })
 }
+
+// Clear unused rooms from db
+setInterval(function () {
+  var multi = db.multi()
+
+  db.smembers('currentrooms', gotRooms)
+
+  function gotRooms(err, rooms) {
+    async.forEach(rooms, iterate, done)
+  }
+
+  function iterate(room, cb) {
+    var clients = io.sockets.manager.rooms['/' + room]
+    if (!clients || clients.length === 0) {
+      multi.del([room, 'currentwords'].join(':'))
+      multi.del([room, 'playedwords'].join(':'))
+      multi.del([room, 'currentplayers'].join(':'))
+      multi.srem('currentrooms', room)
+    }
+    cb()
+  }
+
+  function done() {
+    multi.exec()
+  }
+}, 10 * 60 * 1000)
