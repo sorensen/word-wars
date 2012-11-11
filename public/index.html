@@ -5,7 +5,6 @@
   <link rel='stylesheet' href='/css/bootstrap.min.css'>
   <link rel='stylesheet' href='/css/font-awesome.css'>
   <link rel='stylesheet' href='/css/style.css'>
-  <link rel='stylesheet' href='/css/words-game.css'>
 </head>
 <body>
   <div id='wrapper' class='lobby'>
@@ -18,15 +17,19 @@
 
     <div id='header'>
       <div id='logo'>word battle</div>
-      <!--<div id='spacer'></div>-->
       <div id='notification'></div>
+      <a id='home' title='Home - Lobby' class='box icon icon-home'></a>
     </div>
     <div id='inner'>
 
       <!-- Game lobby -->
-      <div class='lobby-mode'></div>
-
-      <ul class='high-scores'></ul>
+      <div id='lobby-mode'>
+        <div id="game-list"></div>
+        <div id="lobby-controls">
+          <button title='Random Room' class='btn btn-info join-room'><i class="icon-plus"></i> Autoplay</button>
+          <button title='Private Room' class='btn btn-info private-room'><i class="icon-key"></i> Private Room</button>
+        </div>
+      </div>
       
       <!-- Word battle screen -->
       <div id="battle-mode">
@@ -51,102 +54,6 @@
             <input id="input" disabled="disabled" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
           </div>
         </div>
-
-        <div id="left" class="sidebar">
-          <div class="accordion" id="left-accordion">
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-words-played">
-                  <i class="icon icon-plus-sign"></i> Words Played
-                </a>
-              </div>
-              <div id="collapse-words-played" class="accordion-body collapse">
-                <div class="accordion-inner">
-                  <div>Wisdom</div>
-                  <div>That</div>
-                  <div>Computer</div>
-                  <div>Spices</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-ammo">
-                  <i class="icon icon-plus-sign"></i> Ammo
-                </a>
-              </div>
-              <div id="collapse-ammo" class="accordion-body collapse in">
-                <div class="accordion-inner">
-                  <div>Something</div>
-                  <div>Another</div>
-                  <div>Suggestive</div>
-                  <div>Pumpkin</div>
-                  <div>Zombie</div>
-                  <div>Template</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="right" class="sidebar">
-          <div class="accordion" id="right-accordion">
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box red-player" data-toggle="collapse" href="#collapse-red-player">
-                  <i class="icon icon-user"></i> Red Player
-                </a>
-              </div>
-              <div id="collapse-red-player" class="accordion-body">
-                <div class="accordion-inner">
-                  <div>Wins: 20</div>
-                  <div>Losses: 12</div>
-                  <div>WPM: 83</div>
-                  <div>Words Played: 54</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box blue-player" data-toggle="collapse" href="#collapse-blue-player">
-                  <i class="icon icon-user"></i> Blue Player
-                </a>
-              </div>
-              <div id="collapse-blue-player" class="accordion-body">
-                <div class="accordion-inner">
-                  <div>Wins: 20</div>
-                  <div>Losses: 12</div>
-                  <div>WPM: 83</div>
-                  <div>Words Played: 54</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="accordion-group">
-              <div class="accordion-heading">
-                <a class="accordion-toggle box" data-toggle="collapse" href="#collapse-users">
-                  <i class="icon icon-plus-sign"></i> Room 1
-                </a>
-              </div>
-              <div id="collapse-users" class="accordion-body">
-                <div class="accordion-inner">
-                  User 1
-                </div>
-                <div class="accordion-inner">
-                  User 2
-                </div>
-                <div class="accordion-inner">
-                  User 3
-                </div>
-                <div class="accordion-inner">
-                  User 4
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -156,20 +63,6 @@
     </div>
 
     <div id='counter'></div>
-
-    <div id='menu'>
-      <a id="fullscreen" class="box icon icon-resize-full"></a>
-
-      <a id='games' href='/' title='Open Rooms' class='box icon icon-globe'>
-      </a>
-
-      <a title='Private Room' class='join-room box icon icon-key'>
-      </a>
-
-      <a title='Random Room' class='join-room box icon icon-plus'>
-      </a>
-
-    </div>
 
     <div id='session-bar'>
       <div class=''>

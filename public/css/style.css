@@ -34,6 +34,27 @@
 
 
 /* =============================================================================
+   Bootstrap Overrides
+   ========================================================================== */
+
+[class^="icon-"], [class*=" icon-"] {
+  background-image: none !important;
+}
+a:hover .icon {
+  text-decoration: none;
+}
+.accordion-group {
+  border: 0;
+  border-radius: 0;
+  margin-bottom: 7pfx;
+}
+.accordion-inner {
+  border: 0;
+  background: #CCEBF5;
+}
+
+
+/* =============================================================================
    General
    ========================================================================== */
 
@@ -44,7 +65,7 @@ body, input, button, textarea, select {
   -webkit-font-smoothing: subpixel-antialiased;
 }
 
-#wrapper .box {
+.box {
   position: relative;
   background: #0099CC;
   padding: 10px;
@@ -120,18 +141,18 @@ html, body {
     letter-spacing: -1px;
     line-height: 50px;
   }
-  #spacer {
-    margin: 4px auto 0;
-    width: 600px;
-    height: 2px;
-    background-color:#ffffff;
-    filter:progid:DXImageTransform.Microsoft.gradient(GradientType=1,startColorstr=#ffffff, endColorstr=#007AA3);
-    background-image:-moz-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
-    background-image:linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
-    background-image:-webkit-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
-    background-image:-o-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
-    background-image:-ms-linear-gradient(left, #ffffff 0%, #007AA3 50%,#ffffff 100%);
-    background-image:-webkit-gradient(linear, left bottom, right bottom, color-stop(0%,#ffffff), color-stop(50%,#007AA3),color-stop(100%,#ffffff));
+  #home {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 26px;
+    text-align: center;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    color: white;
+    text-shadow: 0 -1px 0 black;
   }
 
 #inner {
@@ -143,16 +164,16 @@ html, body {
   #battle-mode {
     display: none;
   }
-  .battle .lobby-mode, .battle .high-scores {
+  .battle #lobby-mode, .battle .high-scores {
     display: none;
   }
-  .lobby .lobby-mode, .lobby .high-scores {
+  .lobby #lobby-mode, .lobby .high-scores {
     display: block;
   }
   #wrapper.battle #battle-mode {
     display: block;
   }
-  #wrapper.lobby .lobby-mode, #wrapper.lobby .high-scores {
+  #wrapper.lobby #lobby-mode, #wrapper.lobby .high-scores {
     display: block;
   }
 
@@ -230,17 +251,307 @@ html, body {
     cursor: pointer;
     text-decoration: none;
   }
+
 #footer {
   height: 24px;
   bottom: 0;
   background: #ADB9BD;
   border-top: 1px solid #676767;
 }
-.page {
-  -webkit-transition: all 1.8s ease-in-out;
-  -moz-transition: all 1.8s ease-in-out;
-  -o-transition: all 1.8s ease-in-out;
-  transition: all 1.8s ease-in-out;
+
+#wrapper .box.blue-player {
+  background: blue;
+}
+
+#wrapper .box.red-player {
+  background: red;
+}
+
+#wrapper .box.session {
+  background: #e2e2e2;
+}
+
+#session-bar {
+  width: 21%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: auto;
+  padding: 0;
+  overflow-y: auto;
+}
+
+/* =============================================================================
+   Lobby
+   ========================================================================== */
+
+#lobby-mode {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 0;
+  bottom: 10px;
+  z-index: 2;
+}
+  #lobby-controls {
+    height: 50px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    text-align: center;
+  }
+    #lobby-controls button {
+      width: 33%;
+      height: 50px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #lobby-controls i {
+      margin-right: 5px;
+    }
+  #game-list {
+    overflow: hidden;
+    overflow-y: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 55px;
+    bottom: 0;
+  }
+
+.game {
+  padding: 5px;
+  position: relative;
+  width: 200px;
+  border-radius: 5px;
+  background: #CCC;
+  margin: 10px;
+  float: left;
+  font-size: 14px;
+  line-height: 27px;
+
+  border: 1px solid #aaaaaa;
+  background-color: #aaaaaa;
+  background-image: -webkit-gradient(linear, top, bottom, from(#cccccc), to(#aaaaaa));
+  background-image: -webkit-linear-gradient(top, #cccccc, #aaaaaa);
+  background-image: -moz-linear-gradient(top, #cccccc, #aaaaaa);
+  background-image: -o-linear-gradient(top, #cccccc, #aaaaaa);
+  background-image: linear-gradient(to bottom, #cccccc, #aaaaaa);
+}
+  .game div {
+  }
+  .game div strong {
+    font-size: 14px;
+    font-weight: bold;
+    width: 40px;
+    text-align: right;
+    display: inline-block;
+    margin-right: 10px;
+  }
+  .game .watchers {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    height: 25px;
+    min-width: 8px;
+    line-height: 26px;
+    background: #7C7C7C;
+    padding: 0 8px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    font-size: 15px;
+    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+    -moz-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.8);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
+  }
+  .game .controls {
+    margin-top: 5px;
+  }
+    .game .controls button {
+      width: 48.9999%;
+      height: 40px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  .game .open-slot {
+    font-style: italic;
+    color: #444;
+  }
+
+/* =============================================================================
+   Game
+   ========================================================================== */
+
+  #game {
+    position: absolute;
+    z-index: 2;
+    width: auto;
+    margin: 0;
+    left: 10px;
+    right: 10px;
+    top: 0;
+    bottom: 0;
+  }
+  .board {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 72px;
+    font-size: 25px;
+    border-top: 1px solid #bbbbbb;
+    left: 0;
+    width: 49.5%;
+    border-radius: 3px;
+    background-color: #dddddd;
+    background-image: -webkit-gradient(linear, top, bottom, from(#dddddd), to(#ffffff));
+    background-image: -webkit-linear-gradient(top, #dddddd, #ffffff);
+    background-image: -moz-linear-gradient(top, #dddddd, #ffffff);
+    background-image: -o-linear-gradient(top, #dddddd, #ffffff);
+    background-image: linear-gradient(to bottom, #dddddd, #ffffff);
+  }
+  .board + .board {
+    margin-left: 1%;
+    right: 0;
+    left: auto;
+  }
+  .word-list {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+    .word-list div {
+      top: 0;
+      clear: both;
+      height: 9%;
+      line-height: 1;
+      text-align: center;
+      display: table;
+      width: 100%;
+      position: absolute;
+    }
+    .word-list div p {
+      display: table-cell;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      padding: 0;
+      margin: 0;
+      vertical-align: middle; 
+      text-align: center; 
+    }
+
+  #red-player .words div {
+    border-left: 1px solid red;
+    border-right: 1px solid red;
+  }
+  #blue-player .words div {
+    border-left: 1px solid blue;
+    border-right: 1px solid blue;
+  }
+
+  .focus-red-player #red-player, 
+  .focus-blue-player #blue-player {
+    width: 69.5%;
+    font-size: 32px;
+  }
+  .focus-red-player #blue-player, 
+  .focus-blue-player #red-player {
+    width: 29.5%;
+    font-size: 16px;
+  }
+  #input-wrapper {
+    margin: 10px;
+    bottom: 0;
+    position: absolute;
+    right: 0;
+    left: 0;
+
+    z-index: 3;
+    padding: 5px;
+    border: 1px solid #888888;
+    margin-top: -1px;
+
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    border-radius: 8px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #aaaaaa));
+  }
+  #input {
+    text-align: center;
+    margin: 0;
+    width: 100%;
+    height: 50px;
+    border: none;
+    padding: 10px;
+    font: 200 30px/40px "Source Sans Pro",sans-serif;
+    color: rgba(255, 255, 255, 0.85);
+    color: rgba(0, 0, 0, 0.85);
+    outline: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    border: 1px solid #cfcfcf;
+
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fdfdfd), color-stop(100%, #ffffff));
+  }
+
+
+#game-overlay, #sit, #stand, #ready, #ready-overlay, #is-ready-overlay, #game .player {
+  display: none;
+}
+
+.expand {  
+  position: absolute !important;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  bottom: 10px;
+  font-size: 45px;
+  font-weight: bold;
+}
+#stand {
+  top: 80%;
+}
+#ready {
+  bottom: 21%;
+}
+#is-ready-overlay, #game-overlay {
+  cursor: default;
+}
+#game-overlay {
+  z-index: 9;
+}
+.overlay {
+  z-index: 9;
+  opacity: 0.7;
+  background: #fff;
 }
 
 /* =============================================================================
@@ -293,102 +604,3 @@ html, body {
   z-index: 999;
   display: none;
 }
-
-/* =============================================================================
-   Burst
-   ========================================================================== */
-
-.burst {
-  background: red;
-  width: 80px;
-  height: 80px;
-  position: relative;
-  text-align: center;
-}
-.burst:before, .burst:after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 80px;
-  width: 80px;
-  background: red;
-}
-.burst:before {
-  -webkit-transform: rotate(30deg);
-     -moz-transform: rotate(30deg);
-      -ms-transform: rotate(30deg);
-       -o-transform: rotate(30deg);
-}
-.burst:after {
-  -webkit-transform: rotate(60deg);
-     -moz-transform: rotate(60deg);
-      -ms-transform: rotate(60deg);
-       -o-transform: rotate(60deg);
-}
-/* =============================================================================
-   Danish woven heart -- https://gist.github.com/1051529
-   ========================================================================== */
-
-.heart {
-  position: absolute;
-  width: 3em;
-  height: 3em;
-  font-size: 16px;
-}
-  .heart-left,
-  .heart-right {
-   -moz-border-radius: 100%;
-    -webkit-border-radius: 100%;
-    border-radius: 100%;
-    top: -30%;
-  }
-  .heart-left,
-  .heart-right,
-  .heart-bottom,
-  .heart-content {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 4;
-  }
-  .heart-left {
-    z-index: 4;
-    background: #0099CC;
-    left: -30%;
-   -moz-box-shadow: inset 0.1em 0.1em 0.1em #aaa, -1px -1px 0 #3d3d3d;
-    -webkit-box-shadow: inset 0.1em 0.1em 0.1em #aaa, -1px -1px 0 #3d3d3d;
-    box-shadow: inset 0.1em 0.1em 0.1em rgba(0, 0, 0, 0.3);
-  }
-  .heart-right {
-    z-index: 3;
-    background: #fff;
-    right: -30%;
-   -moz-box-shadow: inset -0.1em 0.1em 0.25em #aaa, -1px -1px 0 #3d3d3d;
-    -webkit-box-shadow: inset -0.1em 0.1em 0.25em #aaa, -1px -1px 0 #3d3d3d;
-    box-shadow: inset -0.1em 0.1em 0.25em rgba(0, 0, 0, 0.3);
-  }
-  .heart-content {
-    border-radius: 7% 0;
-    top: 0;
-    left: 0;
-    zoom: 1;
-    z-index: 4;
-    -moz-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    transform: rotate(45deg);  
-    filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.7071067811865476, M12=-0.7071067811865475, M21=0.7071067811865475, M22=0.7071067811865476, sizingMethod='auto expand');
-
-    background-color: #fff;
-    background-image: 
-    -webkit-linear-gradient(45deg, #0099CC 25%, transparent 25%, transparent 75%, #0099CC 75%, #0099CC), 
-    -webkit-linear-gradient(45deg, #0099CC 25%, transparent 25%, transparent 75%, #0099CC 75%, #0099CC);
-    background-size: 2em 2em;
-    background-position: 0 0, 1em 1em;
-
-    -moz-box-shadow: inset -0.075em -0.075em 0.2em #bbb;
-    -webkit-box-shadow: inset -0.075em -0.075em 0.2em #bbb;
-    box-shadow: inset -0.075em -0.075em 0.2em #bbb;
-  }

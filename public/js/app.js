@@ -374,6 +374,8 @@
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
 
+    console.log('updateSeats: ', pid, red, blue)
+
     // Both players sitting
     if (red && blue) {
       this.$sit.hide()

@@ -25,8 +25,8 @@
     // Cache selectors
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
-    this.$el = $('.lobby-mode')
-    this.$fullscreen = $('#fullscreen')
+    this.$el = $('#lobby-mode')
+    this.$gameList = $('#game-list')
 
     $win.unload(function() {
       self.game && self.game.quit()
@@ -50,7 +50,6 @@
     this.socket.on('connect', function() { 
       self.connect() 
     })
-    this.$fullscreen.click(function() { self.fullscreen() })
   }
   // Home screen
   Lobby.prototype.home = function() {
@@ -73,7 +72,7 @@
     this.socket.emit('getRooms', function (rooms) {
       console.log('getRooms: ', JSON.stringify(rooms, null, 2))
       // if (rooms.length === 0) return self
-      self.$el.empty()
+      self.$gameList.empty()
       rooms.forEach(function (room) {
         self.render(room)
       })
@@ -100,41 +99,21 @@
     return this
   }
   Lobby.prototype.render = function(room) {
-    var $room = this.$el.find('[data-id="' + room.id + '"]')
     var watchers = room.clients.length - room.players.length
+    
     watchers = watchers >= 0 ? watchers : 0
+    
     var $html = $(views.roomBox({ 
-        room : room.id
-      , players : room.players
-      , watchers : watchers
-      , words : '80'
+      room : room.id
+    , players : room.players
+    , watchers : watchers
+    , words : '80'
     }))
-    this.$el.append($html)
-  }
-  Lobby.prototype.refresh = function() {
+    console.log('render: ', $html, this.$gameList)
+    this.$gameList.append($html)
     return this
   }
-
-  Lobby.prototype.fullscreen = function() {
-    if (this.isFullscreen) {
-      this.isFullscreen = false
-      
-      this.$fullscreen
-        .removeClass('icon-resize-small')
-        .addClass('icon-resize-full')
-      
-      this.$wrapper
-        .removeClass('fullscreen')
-    } else {
-      this.isFullscreen = true
-      
-      this.$fullscreen
-        .addClass('icon-resize-small')
-        .removeClass('icon-resize-full')
-      
-      this.$wrapper
-        .addClass('fullscreen')
-    }
+  Lobby.prototype.refresh = function() {
     return this
   }
 
