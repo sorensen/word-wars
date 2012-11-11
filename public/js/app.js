@@ -275,8 +275,9 @@
     }
     $('#blue-player .player-name span').html(getPlayerName(otherSeat))
 
-
     this.clearBoard()
+
+    if (this.room.playing) return
 
     this.$counter
       .show()
@@ -440,6 +441,8 @@
   }
   Game.prototype.updateWords = function() {
     var self = this
+
+    if (this.room.playing) this.start()
 
     this.room.players.forEach(function (player) {
       var seat = player.seat
