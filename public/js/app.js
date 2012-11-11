@@ -435,6 +435,42 @@
     })
     return this
   }
+  Game.prototype.updateWords = function() {
+    var self = this
+
+    this.room.players.forEach(function (player) {
+      var seat = player.seat
+        , words = player.currentWords
+
+      words.forEach(function (word) {
+        word = word.toLowerCase().trim()
+
+        var $word = $('<div><p>' + word + '</p></div>')
+          , $el
+
+        if (seat === 'red') {
+          $el = self.$red
+          self.redWords[word] = $word
+        } else {
+          $el = self.$blue
+          self.blueWords[word] = $word
+        }
+
+        $el.append($word)
+
+        var idx = $word.index() * 10
+          , position
+
+        position = 90 - idx
+        $word.data('bottom', true)
+        $word.css({top: position + '%'})
+        $word.lettering()
+        self.updateSpacesLeft()
+      })
+    })
+
+    return this
+  }
   Game.prototype.updateSeats = function() {
     var self = this
       , pid = this.pid
@@ -457,6 +493,7 @@
       $other.show().find('strong').html(getPlayerName(forOther))
       if (!this.isSitting) {
         $('#red-player .player').show().find('strong').html(getPlayerName(red))
+        this.updateWords()
       }
     // One player sitting
     } else if (red || blue) {
