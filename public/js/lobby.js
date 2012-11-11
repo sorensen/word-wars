@@ -57,12 +57,17 @@
     this.$el.on('click', '.join-room', function (e) {
       self.join(null, null, true)
     })
-    this.$el.on('click', '.create-room', function (e) {
-      //self.join(false)
+    this.$el.on('click', '.private-room', function (e) {
+      self.join(null, null, true, true)
     })
     this.socket = socket
-    this.socket.on('connect', function() { 
-      self.connect() 
+    this.socket.on('connect', function() {
+      self.connect()
+    })
+    $win.hashchange(function () {
+      if (window.location.hash && window.location.hash.length > 1) {
+        self.join(window.location.hash.split('#')[1])
+      }
     })
   }
   // Home screen
@@ -73,6 +78,11 @@
   Lobby.prototype.connect = function() {
     var self = this
     this.Sessions = new Sessions().display()
+
+    if (window.location.hash && window.location.hash.length > 0) {
+      self.join(window.location.hash.split('#')[1])
+    }
+
     // this.HighScores = window.HighScores.display()
     this.socket.emit('getPlayers', function(players) {
       window.players = players
@@ -103,8 +113,8 @@
     return this
   }
   // Join a game
-  Lobby.prototype.join = function(id, $el, autoSit) {
-    this.game = new Game(this.socket, id, autoSit).connect()
+  Lobby.prototype.join = function(id, $el, autoSit, priv) {
+    this.game = new Game(this.socket, id, autoSit, priv).connect()
     this.$wrapper
       .removeClass('lobby')
       .addClass('battle')
@@ -112,6 +122,7 @@
   }
   // Leave the game
   Lobby.prototype.leave = function() {
+    window.location.hash = ''
     this.game && this.game.quit()
     this.game = null
     this.$wrapper

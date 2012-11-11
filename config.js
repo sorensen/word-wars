@@ -3,11 +3,12 @@ var express     = require('express')
   , cookie      = require('cookie')
   , redis       = require('redis')
   , ejs         = require('ejs')
+  , sio         = require('socket.io')
   , parseCookie = connect.utils.parseSignedCookies
   , RedisStore  = require('connect-redis')(express)
 
 module.exports = function (app) {
-  var io = require('socket.io').listen(app.settings.server)
+  var io = sio.listen(app.settings.server)
 
   app.configure('development', function () {
     app.set('redis', {
@@ -34,7 +35,6 @@ module.exports = function (app) {
     app.settings.db.auth(app.settings.redis.auth)
     app.set('sessionStore', new RedisStore({client: app.settings.db}))
     app.set('sessionSecret', 'IvIVKmFkjE!!a3fP6C38%m%C0%n094bpGnn73GrJU5$oET6!tI^a4pmFs7X3!Ue^')
-    app.use(express.static(__dirname + '/public'))
     app.use(express.bodyParser())
     app.use(express.methodOverride())
     app.use(express.cookieParser())
@@ -46,10 +46,21 @@ module.exports = function (app) {
       dumpExceptions: true
     , showStack: true
     }))
+    app.use(express.static(__dirname + '/public'))
     app.use(app.router)
   })
 
   io.configure(function () {
+    var RedisStore = sio.RedisStore
+
+    var redisPubSub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
+    redisPubSub.auth(app.settings.redis.auth)
+
+    io.set('store', new RedisStore({
+        redisPub: redisPubSub
+      , redisSub: redisPubSub
+      , redisClient: app.settings.db
+    }))
     
     io.disable('log');
 

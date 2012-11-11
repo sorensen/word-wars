@@ -96,7 +96,7 @@ function ioMain(socket) {
   function sendPlayers() {
     db.hgetall('players', function(err, players) {
       console.log('ALL PLAYERS', players)
-      io.sockets.in('').emit('players', players)
+      io.sockets.emit('players', players)
     })
   }
 
@@ -130,7 +130,7 @@ function ioMain(socket) {
     })
   })
 
-  socket.on('join', function (room, cb) {
+  socket.on('join', function (room, priv, cb) {
     if (room) {
       getRoom(room, function (err, room) {
         socket.join(room.id)
@@ -147,8 +147,9 @@ function ioMain(socket) {
         return room.players.length < 2
       })
 
-      if (joinableRooms.length === 0) {
+      if (priv || joinableRooms.length === 0) {
         room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
+        if (priv) room += '_private'
         socket.join(room)
         updateLobby()
         db.sadd('currentrooms', room)
@@ -299,6 +300,7 @@ function ioMain(socket) {
       if (room === '') return
       stand(room, socket)
     })
+    db.hdel('players', socket.id)
   })
 }
 
@@ -411,7 +413,11 @@ function updateLobby () {
 
 function getRooms(cb) {
   var rooms = Object.keys(io.sockets.manager.rooms).filter(function (room) {
-    return room && room !== ''
+    if (!room || room === '') return false
+
+    if (room.slice(1).indexOf('_private') > -1) return false
+
+    return true
   })
 
   async.map(rooms, iterate, cb)

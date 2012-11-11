@@ -16,7 +16,7 @@
   // Game Engine
   // ===========
 
-  function Game(socket, id, autoSit) {
+  function Game(socket, id, autoSit, priv) {
     var self = this
 
     this.socket = socket
@@ -26,6 +26,7 @@
     this.autoSit = autoSit
     this.redWords = {}
     this.blueWords = {}
+    this.private = priv
 
     // Cache selectors
     this.$el = $('#battle-mode')
@@ -111,11 +112,15 @@
     this.socket.on('stood',   function () { self.stood.apply(self, arguments) })
     this.socket.on('ready',   function () { self.playerReady.apply(self, arguments) })
 
-    this.send('join', this.id, function(e, room) {
+    this.send('join', this.id, this.private, function(e, room) {
       if (e) return
 
       self.id = room.id
       self.room = room
+
+      if (window.location.hash !== room.id) {
+        window.location.hash = room.id
+      }
 
       for (var i = 0; i !== room.players.length; i++) {
         var player = room.players[i]
