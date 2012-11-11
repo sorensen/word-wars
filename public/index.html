@@ -35,17 +35,17 @@
       <!-- Word battle screen -->
       <div id="battle-mode">
         <div id="game" class="focus-">
-          <button id="game-overlay" class="btn expand"></button>
+          <a id="game-overlay" class="btn expand"><span></span></a>
           <div class="board" id="red-player">
             <div class="player-name">
               <span></span>
               <div class="spaces-left">10</div>
             </div>
             <div class="word-list"></div>
-            <button id="sit" class="btn btn-info expand">Sit</button>
-            <button id="stand" class="btn expand">Stand</button>
-            <button id="ready" class="btn btn-info expand"><span>Ready</span></button>
-            <button class="player expand"><i class="icon icon-user"></i><span></span></button>
+            <div id="sit" class="btn btn-info expand"><span>Sit</span></div>
+            <div id="stand" class="btn expand"><span>Stand</span></div>
+            <div id="ready" class="btn btn-info expand"><span>Ready</span></div>
+            <div class="player expand"><span><i class="icon icon-user"></i><strong></strong></span></div>
             <div id="ready-overlay" class="overlay expand"></div>
           </div>
 
@@ -55,8 +55,8 @@
               <div class="spaces-left">10</div>
             </div>
             <div class="word-list"></div>
-            <button class="btn player expand"><i class="icon icon-user"></i><span></span></button>
-            <button id="is-ready-overlay" class="overlay btn expand"><span>Ready</span></button>
+            <div class="btn player expand"><span><i class="icon icon-user"></i><strong></strong></span></div>
+            <div id="is-ready-overlay" class="overlay btn expand"><span>Ready</span></div>
           </div>
 
           <div id="input-wrapper">

@@ -598,6 +598,19 @@ html, body {
   font-size: 45px;
   font-weight: bold;
 }
+
+.board .btn span {
+  display: block;
+  height: 40px;
+  line-height: 40px;
+  margin: 0 auto;
+  margin-top: -20px;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  width: 100%;
+  left: 0;
+}
 #stand {
   top: 80%;
 }
