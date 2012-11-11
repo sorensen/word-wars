@@ -163,6 +163,7 @@ function ioMain(socket) {
     db.hgetall(key, getPlayers)
 
     function getPlayers(err, players) {
+      console.log('PLAYER READY: ', key, players)
       if (!players || !players[socket.id]) return cb('Not sitting in room')
 
       var playersReady = false
@@ -299,7 +300,11 @@ function getRoom(room, cb) {
     var players = []
     if (playersObj) {
       players = Object.keys(playersObj).map(function (key) {
-        var data = playersObj[key].split(':')
+        var data = playersObj[key]
+        if (!data) {
+          return {}
+        }
+        data = data.split(':')
         return {
             id: key
           , seat: data[1]
@@ -347,6 +352,7 @@ function getRooms(cb) {
       var players = []
       if (playersObj) {
         players = Object.keys(playersObj).map(function (key) {
+          console.log('GOT PLAYERS: ', playersObj[key])
           var data = playersObj[key].split(':')
           return {
               id: key
