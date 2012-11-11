@@ -28,13 +28,13 @@ var computer = {
 
         db.hkeys(key, gotUsers)
 
-        function gotUsers(err, users) {
-          var idx = getRandomInt(0, users.length)
+        function gotUsers(err, users, origIdx) {
+          var idx = origIdx || getRandomInt(0, 1)
             , attacker = users[idx]
             , defender = users[idx === 0 ? 1 : 0]
           attack(room, me.word(), attacker, defender, function (err) {
-            if (err) gotUsers(null, users)
-          })
+            if (err) gotUsers(null, users, idx)
+          }, true)
         }
       })
   }
@@ -273,8 +273,22 @@ function ioMain(socket) {
   })
 }
 
-function attack(room, word, attacker, defender, cb) {
-  db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+function attack(room, word, attacker, defender, cb, auto) {
+  var key = [room, 'currentwords'].join(':')
+    , length = 0
+  db.smembers(key, gotCount)
+
+  function gotCount(err, words) {
+    words || (words = [])
+    words.forEach(function (word) {
+      word = word.split(':')
+      if (word[0] !== attacker) length += 1
+    })
+
+    if (auto && length >= 8) return cb()
+
+    db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+  }
 
   function checkAllWords(err, res) {
     if (err) return cb('Error checking word')
@@ -283,22 +297,12 @@ function attack(room, word, attacker, defender, cb) {
       return cb('Word was already played')
     }
 
-    var key = [room, 'currentwords'].join(':')
-    console.log('GET COUNT: ', key, defender + ':' + word)
-    db.multi()
-      .sadd(key, defender + ':' + word)
-      .smembers(key, gotCount)
-      .exec()
+    length += 1
+
+    db.sadd(key, defender + ':' + word, addedWord)
   }
 
-  function gotCount(err, words) {
-    console.log('GOT COUNT: ', words)
-    words || (words = [])
-    var length = 0
-    words.forEach(function (word) {
-      word = word.split(':')
-      if (word[0] !== attacker) length += 1
-    })
+  function addedWord(err) {
     if (length > 10) {
       io.sockets.in(room).emit('won', attacker)
       clearRoom(room)
