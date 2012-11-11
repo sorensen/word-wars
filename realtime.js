@@ -14,7 +14,6 @@ function ioMain(socket) {
 
   socket.on('getRooms', function (cb) {
     getRooms(function (err, rooms) {
-      console.log(rooms)
       cb(rooms)
     })
   })
@@ -53,28 +52,60 @@ function ioMain(socket) {
   socket.on('sit', function (room, cb) {
     var key = [room, 'currentplayers'].join(':')
       , first = false
+      , color
 
-    db.scard(key, gotSitting)
+    db.hlen(key, gotSitting)
 
     function gotSitting(err, length) {
       if (length >= 2) return cb('There are no seats left')
 
       if (length === 0) first = true
 
-      db.sadd(key, socket.id, addedSitter)
+      color = first ? 'red' : 'blue'
+
+      db.hset(key, socket.id, 'false:' + color, addedSitter)
     }
 
     function addedSitter(err, res) {
       if (res === 0) return cb('You are already sitting')
 
-      io.sockets.in(room).emit('sat', socket.id, first ? 'red' : 'blue')
-      // if (!first) startGame(room)
+      io.sockets.in(room).emit('sat', socket.id, color)
       cb()
     }
   })
 
   socket.on('playerReady', function (room, cb) {
+    var key = [room, 'currentplayers'].join(':')
 
+    db.hgetall(key, getPlayers)
+
+    function getPlayers(err, players) {
+      if (!players[socket.id]) return cb('Not sitting in room')
+
+      var playersReady = []
+        , thisPlayer
+
+      Object.keys(players).forEach(function (key, i) {
+        var player = players[key]
+          , ready  = player.split(':')[0]
+
+        playersReady[i] = ready
+        if (key === socket.id) {
+          playersReady[i] = true
+          thisPlayer = player.split(':')
+          thisPlayer[0] = true
+          thisPlayer = thisPlayer.join(':')
+        }
+      })
+
+      if (playersReady[0] && playersReady[1]) startGame(room)
+
+      db.hset(key, socket.id, thisPlayer, setReady)
+    }
+
+    function setReady(err) {
+      cb()
+    }
   })
 
   socket.on('stand', function (room, cb) {
@@ -160,7 +191,6 @@ function getRooms(cb) {
   async.map(rooms, iterate, cb)
 
   function iterate(room, callback) {
-    console.log(room)
     room = room.slice(1)
 
     var roomObj = {
@@ -168,10 +198,10 @@ function getRooms(cb) {
       , clients: io.sockets.manager.rooms['/' + room]
     }
     
-    db.smembers([room, 'currentplayers'].join(':'), gotPlayers)
+    db.hgetall([room, 'currentplayers'].join(':'), gotPlayers)
 
     function gotPlayers(err, players) {
-      roomObj.players = players
+      roomObj.players = players ? Object.keys(players) : []
       
       callback(null, roomObj)
     }
@@ -181,7 +211,7 @@ function getRooms(cb) {
 function stand(room, socket, cb) {
   var key = [room, 'currentplayers'].join(':')
 
-  db.srem(key, socket.id, removedSitting)
+  db.hdel(key, socket.id, removedSitting)
 
   function removedSitting(err, res) {
     if (res === 0) return cb && cb('Not sitting in that room')

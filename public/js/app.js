@@ -445,7 +445,7 @@
     var self = this
     console.log('ready!')
       self.$readyOverlay.show()
-    this.send('ready', this.id, function(err) {
+    this.send('playerReady', this.id, function(err) {
       err && self.notify(err)
     })
     return this
