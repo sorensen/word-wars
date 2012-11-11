@@ -11,8 +11,9 @@ module.exports = function (app) {
 
   app.configure('development', function () {
     app.set('redis', {
-        host: 'localhost'
+        host: 'nodejitsudb2600402396.redis.irstack.com'
       , port: 6379
+      , auth: 'nodejitsudb2600402396.redis.irstack.com:f327cfe980c971946e80b8e975fbebb4'
     })
     app.set('port', 3000)
 
@@ -21,8 +22,9 @@ module.exports = function (app) {
 
   app.configure('production', function () {
     app.set('redis', {
-        host: 'localhost'
+        host: 'nodejitsudb2600402396.redis.irstack.com'
       , port: 6379
+      , auth: 'nodejitsudb2600402396.redis.irstack.com:f327cfe980c971946e80b8e975fbebb4'
     })
     app.set('port', 80)
   })
@@ -30,6 +32,7 @@ module.exports = function (app) {
   app.configure(function () {
     app.set('io', io)
     app.set('db', redis.createClient(app.settings.redis.port, app.settings.redis.host))
+    app.settings.db.auth(app.settings.redis.auth)
     app.set('sessionStore', new RedisStore({client: app.settings.db}))
     app.set('sessionSecret', 'IvIVKmFkjE!!a3fP6C38%m%C0%n094bpGnn73GrJU5$oET6!tI^a4pmFs7X3!Ue^')
     app.use(express.static(__dirname + '/public'))
