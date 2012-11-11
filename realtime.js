@@ -14,6 +14,7 @@ module.exports = function (app) {
   io.sockets.sub.auth(app.settings.redis.auth)
 }
 
+
 var computer = {
     words : Object.keys(dictionary)
   , rooms : {}
@@ -28,14 +29,17 @@ var computer = {
         db.hkeys(key, gotUsers)
 
         function gotUsers(err, users) {
-          var idx = getRandomInt(0, users.length)
-            , attacker = users[idx]
-            , defender = users[idx === 0 ? 1 : 0]
-          attack(room, me.word(), attacker, defender, function (err) {
-            if (err) gotUsers(null, users)
-          })
+          autoAttack(room, me.word(), users[0], users[1])
+          autoAttack(room, me.word(), users[1], users[0])
         }
+
       })
+
+      function autoAttack(room, word, attacker, defender) {
+        attack(room, word, attacker, defender, function (err) {
+          if (err) autoAttack(room, word, attacker, defender)
+        }, true)
+      }
   }
   , beginAutoAttack : function (id) { 
       this.rooms[id] = true
@@ -230,10 +234,10 @@ function ioMain(socket) {
     var key = [room, 'currentplayers'].join(':')
       , otherPlayer
 
-    db.hkeys(key, gotPlayers)
+    db.hkeys(key, gotPlayers2)
 
 
-    function gotPlayers(err, players) {
+    function gotPlayers2(err, players) {
       console.log('ATTACK GOT PLAYERS: ', key, players)
       if (!players) return cb('No players in this room')
 
@@ -272,8 +276,22 @@ function ioMain(socket) {
   })
 }
 
-function attack(room, word, attacker, defender, cb) {
-  db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+function attack(room, word, attacker, defender, cb, auto) {
+  var key = [room, 'currentwords'].join(':')
+    , length = 0
+  db.smembers(key, gotCount)
+
+  function gotCount(err, words) {
+    words || (words = [])
+    words.forEach(function (word) {
+      word = word.split(':')
+      if (word[0] !== attacker) length += 1
+    })
+
+    if (auto && length >= 8) return cb()
+
+    db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+  }
 
   function checkAllWords(err, res) {
     if (err) return cb('Error checking word')
@@ -282,20 +300,12 @@ function attack(room, word, attacker, defender, cb) {
       return cb('Word was already played')
     }
 
-    var key = [room, 'currentwords'].join(':')
-    db.multi()
-      .sadd(key, defender + ':' + word)
-      .smembers(key, gotCount)
-      .exec()
+    length += 1
+
+    db.sadd(key, defender + ':' + word, addedWord)
   }
 
-  function gotCount(err, words) {
-    words || (words = [])
-    var length = 0
-    words.forEach(function (word) {
-      word = word.split(':')
-      if (word[0] !== attacker) length += 1
-    })
+  function addedWord(err) {
     if (length > 10) {
       io.sockets.in(room).emit('won', attacker)
       clearRoom(room)
@@ -421,7 +431,9 @@ function resetReady(room, cb) {
 
 function startGame(room) {
   io.sockets.in(room).emit('start')
-  computer.beginAutoAttack(room)
+  setTimeout(function () {
+    computer.beginAutoAttack(room)
+  }, 4 * 1000)
 }
 
 function endGame(room) {
