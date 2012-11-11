@@ -8,12 +8,7 @@ module.exports = function (app) {
   io = app.settings.io
   db = app.settings.db
   io.sockets.on('connection', ioMain)
-  io.sockets.pub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
-  io.sockets.sub = redis.createClient(app.settings.redis.port, app.settings.redis.host)
-  io.sockets.pub.auth(app.settings.redis.auth)
-  io.sockets.sub.auth(app.settings.redis.auth)
 }
-
 
 var computer = {
     words : Object.keys(dictionary)
@@ -22,19 +17,14 @@ var computer = {
   , tick : function () {
       var me = this
         , rooms = Object.keys(me.rooms)
-
       rooms.forEach(function (room) {
         var key = [room, 'currentplayers'].join(':')
-
         db.hkeys(key, gotUsers)
-
         function gotUsers(err, users) {
           autoAttack(room, me.word(), users[0], users[1])
           autoAttack(room, me.word(), users[1], users[0])
         }
-
       })
-
       function autoAttack(room, word, attacker, defender) {
         attack(room, word, attacker, defender, function (err) {
           if (err) autoAttack(room, word, attacker, defender)
@@ -48,11 +38,11 @@ var computer = {
       delete this.rooms[id]
   }
   , word : function () {
-    var randomWord = this.words[getRandomInt(0, this.words.length)]
-    if (randomWord.length > this.length) 
-      return this.word()
-    else
-      return randomWord
+      var randomWord = this.words[getRandomInt(0, this.words.length)]
+      if (randomWord.length > this.length) 
+        return this.word()
+      else
+        return randomWord
   }
 }
 
