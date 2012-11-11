@@ -20,10 +20,13 @@ function ioMain(socket) {
 
   socket.on('join', function (room, cb) {
     if (room) {
-      socket.join(room)
-      db.sadd('currentrooms', room)
-      io.sockets.in(room).emit('join', socket.id)
-      return cb(null, room)
+      getRoom(room, function (err, room) {
+        socket.join(room.id)
+        db.sadd('currentrooms', room.id)
+        io.sockets.in(room.id).emit('join', socket.id)
+        cb(null, room)
+      })
+      return
     }
 
     getRooms(function (err, rooms) {
@@ -35,13 +38,18 @@ function ioMain(socket) {
         room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
         socket.join(room)
         db.sadd('currentrooms', room)
-        return cb(null, room)
+        return cb(null, {
+            id: room
+          , clients: [socket.id]
+          , players: []
+          , playedWords: []
+        })
       }
 
       room = rooms[Math.floor(Math.random()*rooms.length)]
       socket.join(room.id)
       io.sockets.in(room.id).emit('join', socket.id)
-      return cb(null, room.id)
+      return cb(null, room)
     })
   })
 
@@ -125,50 +133,52 @@ function ioMain(socket) {
 
     room = room.slice(1)
 
-    var others = io.sockets.clients(room)
+    var key = [room, 'currentplayers'].join(':')
+      , otherPlayer
 
-    others = others.filter(function (client) {
-      return client.id !== socket.id
-    })
+    db.hkeys(key, gotPlayers)
 
-    word = word.toUpperCase()
+    function gotPlayers(err, players) {
+      if (!players) return cb('No players in this room')
 
-    if (dictionary[word] !== 0) {
-      return cb('Invalid word')
-    }
-
-    db.srem([room, 'currentwords'].join(':'), socket.id + word, checkPlayerWords)
-
-    function checkPlayerWords(err, res) {
-      if (err) return cb('Error checking word')
-
-      if (res === 1) {
-        io.sockets.in(room).emit('block', word, socket.id)
-        return cb(null)
-      }
-
-      db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
-    }
-
-    function checkAllWords(err, res) {
-      if (err) return cb('Error checking word')
-
-      if (res === 0) {
-        return cb('Word was already played')
-      }
-
-
-      var othersArray = others.map(function (client) {
-        return client.id + word
+      players.forEach(function (player) {
+        if (player !== socket.id) otherPlayer = player
       })
-      var multi = db.multi()
-      multi.sadd([room, 'currentwords'].join(':'), othersArray)
-      multi.exec(function (err) {
+
+      word = word.toUpperCase()
+
+      if (dictionary[word] !== 0) {
+        return cb('Invalid word')
+      }
+
+      db.srem([room, 'currentwords'].join(':'), socket.id + word, checkPlayerWords)
+
+      function checkPlayerWords(err, res) {
+        if (err) return cb('Error checking word')
+
+        if (res === 1) {
+          io.sockets.in(room).emit('block', word, socket.id)
+          return cb(null)
+        }
+
+        db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+      }
+
+      function checkAllWords(err, res) {
+        if (err) return cb('Error checking word')
+
+        if (res === 0) {
+          return cb('Word was already played')
+        }
+
+        db.sadd([room, 'currentwords'].join(':'), otherPlayer + word, savedAttack)
+      }
+
+      function savedAttack(err) {
         console.log('checkAllWords: ', err, word, socket.id)
         io.sockets.in(room).emit('attack', word, socket.id)
-      })
-
-      cb(null)
+        cb(null)
+      }
     }
   })
 
@@ -181,6 +191,40 @@ function ioMain(socket) {
       stand(room, socket)
     })
   })
+}
+
+function getRoom(room, cb) {
+  var clients = io.sockets.manager.rooms['/' + room]
+  var roomObj = {
+      id: room
+    , clients: clients ? clients : []
+  }
+
+  db.hgetall([room, 'currentplayers'].join(':'), gotPlayers)
+
+  function gotPlayers(err, playersObj) {
+    var players = []
+    if (playersObj) {
+      players = Object.keys(playersObj).map(function (key) {
+        var data = playersObj[key].split(':')
+        return {
+            id: key
+          , seat: data[1]
+          , ready: data[0] === 'true' ? true : false
+        }
+      })
+    }
+
+    roomObj.players = players
+    
+    db.smembers([room, 'playedwords'].join(':'), gotPlayedWords)
+  }
+
+  function gotPlayedWords(err, words) {
+    roomObj.playedWords = words ? words : []
+
+    cb(null, roomObj)
+  }
 }
 
 function getRooms(cb) {
@@ -196,12 +240,25 @@ function getRooms(cb) {
     var roomObj = {
         id: room
       , clients: io.sockets.manager.rooms['/' + room]
+      , playedWords: []
     }
     
     db.hgetall([room, 'currentplayers'].join(':'), gotPlayers)
 
-    function gotPlayers(err, players) {
-      roomObj.players = players ? Object.keys(players) : []
+    function gotPlayers(err, playersObj) {
+      var players = []
+      if (playersObj) {
+        players = Object.keys(playersObj).map(function (key) {
+          var data = playersObj[key].split(':')
+          return {
+              id: key
+            , seat: data[1]
+            , ready: data[0] === 'true' ? true : false
+          }
+        })
+      }
+
+      roomObj.players = players
       
       callback(null, roomObj)
     }
