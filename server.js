@@ -1,3 +1,5 @@
+if (process.env.NODE_ENV !== 'production') require('rconsole')
+
 var app     = require('express')()
   , server  = require('http').createServer(app)
 
