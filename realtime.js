@@ -145,6 +145,7 @@ function ioMain(socket) {
       if (joinableRooms.length === 0) {
         room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
         socket.join(room)
+        updateLobby()
         db.sadd('currentrooms', room)
         return cb(null, {
             id: room
@@ -257,7 +258,6 @@ function ioMain(socket) {
 
     db.hkeys(key, gotPlayers2)
 
-
     function gotPlayers2(err, players) {
       console.log('ATTACK GOT PLAYERS: ', key, players)
       if (!players) return cb('No players in this room')
@@ -342,12 +342,33 @@ function getRoom(room, cb) {
   var roomObj = {
       id: room
     , clients: clients ? clients : []
+    , players: []
+    , playedWords: []
   }
 
-  db.hgetall([room, 'currentplayers'].join(':'), gotPlayers)
+  if (!clients || clients.length === 0) {
+    cb(null, roomObj)
+  }
 
-  function gotPlayers(err, playersObj) {
+  db.multi()
+    .hgetall([room, 'currentplayers'].join(':'))
+    .smembers([room, 'currentwords'].join(':'))
+    .exec(gotData)
+
+  function gotData(err, data) {
     var players = []
+      , playersObj = data[0]
+      , words = data[1]
+      , wordMap = {}
+
+    if (words) {
+      words.forEach(function (word) {
+        word = word.split(':')
+        if (!wordMap[word[0]]) wordMap[word[0]] = []
+        wordMap[word[0]].push(word[1])
+      })
+    }
+
     if (playersObj) {
       players = Object.keys(playersObj).map(function (key) {
         var data = playersObj[key]
@@ -359,6 +380,7 @@ function getRoom(room, cb) {
             id: key
           , seat: data[1]
           , ready: data[0] === 'true' ? true : false
+          , currentWords: wordMap[key] || []
         }
       })
     }
@@ -377,7 +399,9 @@ function getRoom(room, cb) {
 
 function updateLobby () {
   console.log('updateLobby')
-  io.sockets.in('').emit('updateLobby')
+  getRooms(function (err, rooms) {
+    io.sockets.emit('updateLobby', rooms)
+  })
 }
 
 function getRooms(cb) {
@@ -402,7 +426,6 @@ function getRooms(cb) {
       var players = []
       if (playersObj) {
         players = Object.keys(playersObj).map(function (key) {
-          console.log('GOT PLAYERS: ', playersObj[key])
           var data = playersObj[key].split(':')
           return {
               id: key
@@ -428,7 +451,6 @@ function stand(room, socket, cb) {
     if (res === 0) return cb && cb('Not sitting in that room')
     io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
-    updateLobby()
     cb && cb()
   }
 }
