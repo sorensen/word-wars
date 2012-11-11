@@ -24,6 +24,8 @@
     this.listeners = []
     this.seats = {}
     this.autoSit = autoSit
+    this.redWords = {}
+    this.blueWords = {}
 
     // Cache selectors
     this.$el = $('#battle-mode')
@@ -211,18 +213,16 @@
     word = word.toLowerCase().trim()
 
     if (this.getSeatByPlayer(id) === 'red') {
-      var pWord = this.redWords[word]
-      if (pWord) {
-        idx = pWord.index()
-        pWord.remove()
+      if (this.redWords[word]) {
+        idx = this.redWords[word].index()
+        this.redWords[word].remove()
         delete this.redWords[word]
         this.reStack(this.$red, idx)
       }
     } else {
-      var oWord = this.blueWords[word]
-      if (oWord) {
-        idx = oWord.index()
-        oWord.remove()
+      if (this.blueWords[word]) {
+        idx = this.blueWords[word].index()
+        this.blueWords[word].remove()
         delete this.blueWords[word]
         this.reStack(this.$blue, idx)
       }
