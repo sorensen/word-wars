@@ -156,18 +156,31 @@ function ioMain(socket) {
       if (res === 0) {
         return cb('Word was already played')
       }
-
-
       var othersArray = others.map(function (client) {
         return client.id + word
       })
+      var key = [room, 'currentwords'].join(':')
+
+      db.sadd(key, othersArray, function (err) {
+        db.scard(key, function (err, length) {
+          console.log('')
+          console.log('attack check: ', length)
+          console.log('')
+          if (length > 10) {
+            io.sockets.in(room).emit('won', socket.id)
+          } else {
+            io.sockets.in(room).emit('attack', word, socket.id)
+          }
+        })
+      })
+      cb(null)
+      return
+
       var multi = db.multi()
       multi.sadd([room, 'currentwords'].join(':'), othersArray)
       multi.exec(function (err) {
-        console.log('checkAllWords: ', err, word, socket.id)
         io.sockets.in(room).emit('attack', word, socket.id)
       })
-
       cb(null)
     }
   })
@@ -181,6 +194,10 @@ function ioMain(socket) {
       stand(room, socket)
     })
   })
+}
+
+function winLose(room) {
+
 }
 
 function getRooms(cb) {

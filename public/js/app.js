@@ -152,6 +152,7 @@
     this.$sit = $('#sit')
     this.$stand = $('#stand')
     this.$ready = $('#ready')
+    this.$gameOverlay = $('#game-overlay')
     this.$readyOverlay = $('#ready-overlay')
     this.$isReadyOverlay = $('#is-ready-overlay')
 
@@ -204,16 +205,17 @@
     , 'attack'
     , 'players'
     , 'block'
-    , 'lose'
-    , 'win'
+    , 'won'
     , 'start'
+    , 'sat'
+    , 'stood'
+    , 'ready'
     ]
     this.socket.on('used',    function () { self.usedWord.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
     this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
-    this.socket.on('lose',    function () { self.lost.apply(self, arguments) })
-    this.socket.on('win',     function () { self.won.apply(self, arguments) })
+    this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
     this.socket.on('stood',   function () { self.stood.apply(self, arguments) })
@@ -321,9 +323,10 @@
   // Start game, display countdown
   Game.prototype.start = function() {
     var self = this
-    if (this.isSitting) {
-      this.isPlaying = true
-    }
+    this.isPlaying = this.isSitting
+      ? true
+      : false
+
     this.$counter
       .show()
       .countdown({
@@ -353,17 +356,36 @@
     this.$input.attr('disabled', 'disabled')
     return this
   }
-  Game.prototype.won = function() {
+  Game.prototype.won = function(pid) {
+    var self = this
+      , me = this.pid === pid
+      , msg
 
-    return this.over()
-  }
-  Game.prototype.lost = function() {
+    this.notify('Player ' + pid + ' won!')
 
-    return this.over()
+    if (this.isPlaying) {
+      msg = me
+        ? 'Victory'
+        : 'Defeat'
+
+      this.$gameOverlay.show().html(msg)
+      this.clearBoard()
+
+      this.tick = setTimeout(function() {
+        self.$gameOverlay
+          .html('Game Over')
+          .fadeOut(5000, function() {
+            self.over()
+          })
+      }, 5 * 1000)
+    }
+    return this
   }
   Game.prototype.over = function() {
 
-    return this.clearBoard()
+    return this
+      .clearBoard()
+      .updateSeats()
   }
   // Player has quit the game
   Game.prototype.quit = function() {
@@ -496,6 +518,7 @@
 
     return this
   }
+
   Game.prototype.win = function() {
 
     return this
