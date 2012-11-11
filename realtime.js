@@ -428,7 +428,9 @@ function resetReady(room, cb) {
 
 function startGame(room) {
   io.sockets.in(room).emit('start')
-  computer.beginAutoAttack(room)
+  setTimeout(function() {
+    computer.beginAutoAttack(room)
+  }, 10 * 1000)
 }
 
 function endGame(room) {

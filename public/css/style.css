@@ -325,6 +325,10 @@ html, body {
   padding: 5px;
   position: relative;
   width: 200px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
   border-radius: 5px;
   background: #CCC;
   margin: 10px;
@@ -421,9 +425,35 @@ html, body {
     right: 0;
     left: auto;
   }
+  .player-name {
+    position: absolute;
+    top: 5px;
+    height: 35px;
+    line-height: 35px;
+    font-size: 20px;
+    left: 5px;
+    right: 5px;
+    background-color: #ffffff;
+    background-image: -webkit-gradient(linear, top, bottom, from(#ffffff), to(#e3e3e3));
+    background-image: -webkit-linear-gradient(top, #ffffff, #e3e3e3);
+    background-image: -moz-linear-gradient(top, #ffffff, #e3e3e3);
+    background-image: -o-linear-gradient(top, #ffffff, #e3e3e3);
+    background-image: linear-gradient(to bottom, #ffffff, #e3e3e3);
+
+    text-align: center;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+
+    border: 1px solid #bbbbbb;
+    font-weight: bold;
+    text-shadow: 0 1px 0 #ffffff;
+  }
   .word-list {
     position: absolute;
-    top: 0;
+    top: 40px;
     right: 0;
     bottom: 0;
     left: 0;

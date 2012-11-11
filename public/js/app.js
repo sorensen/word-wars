@@ -147,6 +147,7 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
+    console.log('attacked: ', word)
     word = word.toLowerCase().trim()
 
     var $word = $('<div><p>' + word + '</p></div>')
@@ -238,6 +239,16 @@
 
     this.gameStarted = true
 
+    $('.player-name').show()
+
+    if (this.isPlaying) {
+      $('#red-player .player-name').html('You')
+      $('#blue-player .player-name').html('Opponent')
+    } else {
+      $('#red-player .player-name').html(this.seats.red)
+      $('#blue-player .player-name').html(this.seats.blue)
+    }
+
     this.$counter
       .show()
       .countdown({
@@ -296,6 +307,7 @@
     if (this.gameStarted) {
 
     }
+    $('.player-name').hide()
     this.gameStarted = false
     return this
       .clearBoard()
@@ -447,7 +459,6 @@
     return this
   }
   Game.prototype.clearBoard = function() {
-    console.log('clearBoard')
     this.$el.find('.player').hide()
     this.$sit.hide()
     this.$stand.hide()
