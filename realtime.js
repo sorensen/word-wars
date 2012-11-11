@@ -9,8 +9,35 @@ module.exports = function (app) {
   io.sockets.on('connection', ioMain)
 }
 
+function getSessionId (socketid) {
+  return io.sockets.manager.handshaken[socketid].session.id
+}
+
 function ioMain(socket) {
   var session = socket.handshake.session
+
+  socket.on('getSession', function (socketid, cb) {
+    db.get('sess:' + getSessionId(socketid), cb)
+  })
+
+  socket.on('getScores', function (cb) {
+    db.ZREVRANGEBYSCORE('highestScores', '+inf', '-inf', 'WITHSCORES LIMIT 0 10', function (err, replies) { 
+      console.log('scores', replies)
+      cb(replies)
+    })
+  })
+
+  socket.on('setScore', function (name, score, cb) {
+    db.zadd('highestScores', score, name, cb)
+  })
+
+  socket.on('setName', function (name, cb) {
+    db.get('sess:'+session.id, function (err, user) {
+      user = JSON.parse(user)
+      user.name = name
+      db.set('sess:'+session.id, JSON.stringify(user), cb)
+    })
+  })
 
   socket.on('getRooms', function (cb) {
     getRooms(function (err, rooms) {
@@ -24,6 +51,7 @@ function ioMain(socket) {
         socket.join(room.id)
         db.sadd('currentrooms', room.id)
         io.sockets.in(room.id).emit('join', socket.id)
+        updateLobby()
         cb(null, room)
       })
       return
@@ -49,6 +77,7 @@ function ioMain(socket) {
       room = rooms[Math.floor(Math.random()*rooms.length)]
       socket.join(room.id)
       io.sockets.in(room.id).emit('join', socket.id)
+      updateLobby()
       return cb(null, room)
     })
   })
@@ -78,8 +107,8 @@ function ioMain(socket) {
 
     function addedSitter(err, res) {
       if (res === 0) return cb('You are already sitting')
-
       io.sockets.in(room).emit('sat', socket.id, color)
+      updateLobby()
       cb()
     }
   })
@@ -194,10 +223,8 @@ function ioMain(socket) {
 
   socket.on('disconnect', function () {
     var rooms = io.sockets.manager.roomClients[socket.id]
-
     Object.keys(rooms).forEach(function (room) {
       if (room === '') return
-
       stand(room, socket)
     })
   })
@@ -238,6 +265,11 @@ function getRoom(room, cb) {
 
     cb(null, roomObj)
   }
+}
+
+function updateLobby () {
+  console.log('updateLobby')
+  io.sockets.in('').emit('updateLobby')
 }
 
 function getRooms(cb) {
@@ -288,6 +320,7 @@ function stand(room, socket, cb) {
 
     io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
+    updateLobby()
     cb && cb()
   }
 }
@@ -323,5 +356,6 @@ function clearRoom(room) {
   multi.del([room, 'playedwords'].join(':'))
   multi.exec(function () {
     endGame(room)
+    updateLobby()
   })
 }

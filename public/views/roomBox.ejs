@@ -1,0 +1,25 @@
+<div class='game' data-id="<%= room %>">
+  <div class='red-player'>
+    <strong>Red:</strong> <span>
+    <% if (players[0]) { %>
+      <%= players[0].id.slice(0,12) %>
+    <% } else { %>
+      <span class='open-slot'>Open</span>
+    <% } %>
+  </span>
+  </div>
+  <div class='blue-player'>
+    <strong>Blue:</strong> <span>
+    <% if (players[1]) { %>
+      <%= players[1].id.slice(0,12) %>
+    <% } else { %>
+      <span class='open-slot'>Open</span>
+    <% } %>
+    </span>
+  </div>
+  <div class='watchers' title='Users in Game'><span><%= watchers %></span></div>
+  <div class='controls'>
+    <button title='<%= room %>' class='play btn btn'>Play</button>
+    <button title='<%= room %>' class='join btn btn'>Watch</button>
+  </div>
+</div>

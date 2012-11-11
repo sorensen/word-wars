@@ -13,147 +13,6 @@
     , DELETE = 8
     , imgPath = '/img/digits.png'
 
-
-  // Game Lobby
-  // ==========
-
-  function Lobby(socket) {
-    var self = this
-
-    this.game = null
-
-    // Cache selectors
-    this.$wrapper = $('#wrapper')
-    this.$home = $('#home')
-    this.$el = $('#lobby-mode')
-    this.$fullscreen = $('#fullscreen')
-
-    $win.unload(function() {
-      self.game && self.game.quit()
-    })
-    this.$home.click(function() { self.home() })
-
-    this.$el.on('click', '.join', function(e) {
-      var $el = $(this)
-        , id = $el.parent().data('id')
-
-      self.join(id)
-    })
-
-    this.$el.on('click', '.join-room', function (e) {
-      self.join(false)
-    })
-    this.$el.on('click', '.create-room', function (e) {
-      //self.join(false)
-    })
-    this.socket = socket
-    this.socket.on('connect', function() { 
-      self.connect() 
-    })
-    this.$fullscreen.click(function() { self.fullscreen() })
-  }
-  // Home screen
-  Lobby.prototype.home = function() {
-    this.leave()
-  }
-  // Socket connection handler
-  Lobby.prototype.connect = function() {
-    var self = this
-
-    this.socket.emit('getRooms', function(rooms) {
-      console.log('getRooms: ', rooms)
-      if (rooms.length === 0) return self
-
-      rooms.forEach(function (room) {
-        self.render(room)
-      })
-    })
-    return this
-  }
-  Lobby.prototype.games = function() {
-    return this
-  }
-  // Join a game
-  Lobby.prototype.join = function(id) {
-    this.game = new Game(this.socket, id).connect()
-    this.$wrapper
-      .removeClass('lobby')
-      .addClass('battle')
-    return this
-  }
-  // Leave the game
-  Lobby.prototype.leave = function() {
-    this.game && this.game.quit()
-    this.game = null
-    this.$wrapper
-      .removeClass('battle')
-      .addClass('lobby')
-    return this
-  }
-  // Render all rooms
-  Lobby.prototype.render = function(room) {
-    var $el = this.$el.find('[data-id="' + room.id + '"]')
-
-    // If the room does not exist, create it
-    if (!$el || !$el.length) {
-      var players = room.players.length
-        , watchers = room.clients.length - room.players.length
-
-      watchers = watchers >= 0 ? watchers : 0
-      $el = $(''
-        + '<div class="game" data-id="' + room.id + '">'
-        + '  <button class="join btn btn-info btn-small">Join</button>'
-        + '  <div class="host"><span>Host:</span> Some Host</div>'
-        + '  <div class="blue-player"><span>Players:</span> ' + players + '</div>'
-        + '  <div class="watchers"><span>Watchers:</span> ' + watchers + '</div>'
-        + '  <div class="words"><span>Words:</span> 80</div>'
-        + '</div>'
-      )
-      this.$el.append($el)
-    } else {
-      this.update($el, room)
-    }
-  }
-  // Update room information
-  Lobby.prototype.update = function($el, room) {
-    $el
-      .find('.join').end()
-      .find('.host span').html().end()
-      .find('.blue-player span').html().end()
-      .find('.red-player span').html().end()
-      .find('.watchers span').html().end()
-      .find('.words span').html().end()
-    return this
-  }
-  // Refresh all games in the view
-  Lobby.prototype.refresh = function() {
-    return this
-  }
-
-  Lobby.prototype.fullscreen = function() {
-    if (this.isFullscreen) {
-      this.isFullscreen = false
-      
-      this.$fullscreen
-        .removeClass('icon-resize-small')
-        .addClass('icon-resize-full')
-      
-      this.$wrapper
-        .removeClass('fullscreen')
-    } else {
-      this.isFullscreen = true
-      
-      this.$fullscreen
-        .addClass('icon-resize-small')
-        .removeClass('icon-resize-full')
-      
-      this.$wrapper
-        .addClass('fullscreen')
-    }
-    return this
-  }
-
-
   // Game Engine
   // ===========
 
@@ -511,6 +370,8 @@
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
 
+    console.log('updateSeats: ', pid, red, blue)
+
     // Both players sitting
     if (red && blue) {
       this.$sit.hide()
@@ -615,8 +476,6 @@
     return this
   }
 
-  $(function() {
-    window.lobby = new Lobby(io.connect())
-  })
+  window.Game = Game
 
 }).call(this)

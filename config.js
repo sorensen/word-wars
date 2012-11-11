@@ -16,7 +16,7 @@ module.exports = function (app) {
     })
     app.set('port', 3000)
 
-    app.use(express.logger())
+    // app.use(express.logger())
   })
 
   app.configure('production', function () {
@@ -35,7 +35,6 @@ module.exports = function (app) {
     app.use(express.static(__dirname + '/public'))
     app.use(express.bodyParser())
     app.use(express.methodOverride())
-    app.set('views', __dirname + '/views')
     app.use(express.cookieParser())
     app.use(express.session({
         store: app.settings.sessionStore
@@ -46,10 +45,12 @@ module.exports = function (app) {
     , showStack: true
     }))
     app.use(app.router)
-    app.engine('html', ejs.renderFile)
   })
 
   io.configure(function () {
+    
+    io.disable('log');
+
     io.set('authorization', function (data, callback) {
       if (!data.headers.cookie) {
         return callback('No cookie', false)
