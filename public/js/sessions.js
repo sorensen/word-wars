@@ -31,17 +31,17 @@
           cb && cb()
         })
     }
-    , getSession : function (socketid, cb) {
+    , getSession : function (cb) {
         var me = this
-        conn.emit('getSession', socketid, function (err, session) {
+        conn.emit('getSession', function (err, session) {
           if (err) console.log(err)
-          cb(me.sessions[socketid] = me.current = JSON.parse(session))
+          cb(me.sessions[conn.socket.sessionid] = me.current = session)
         })
     }
     , display : function () {
         var me = this
         console.log('display name')
-        this.getSession(window.conn.socket.sessionid, function (session) {
+        this.getSession(function (session) {
           if (!session.name) me.setName('anonymous')
           else me.$el.html('<i>' + me.current.name || session.name + '</i> <small class="icon icon-edit"></small>')
         })
