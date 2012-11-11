@@ -9,8 +9,24 @@ module.exports = function (app) {
   io.sockets.on('connection', ioMain)
 }
 
+function getSessionId (socketid) {
+  return io.sockets.manager.handshaken[socketid].session.id
+}
+
 function ioMain(socket) {
   var session = socket.handshake.session
+
+  socket.on('getSession', function (socketid, cb) {
+    db.get('sess:' + getSessionId(socketid), cb)
+  })
+
+  socket.on('setName', function (name, cb) {
+    db.get('sess:'+session.id, function (err, user) {
+      user = JSON.parse(user)
+      user.name = name
+      db.set('sess:'+session.id, JSON.stringify(user), cb)
+    })
+  })
 
   socket.on('getRooms', function (cb) {
     getRooms(function (err, rooms) {
@@ -22,6 +38,8 @@ function ioMain(socket) {
   socket.on('join', function (room, cb) {
     if (room) {
       socket.join(room)
+      db.sadd('currentrooms', room)
+      updateLobby()
       return io.sockets.in(room).emit('join', socket.id)
     }
 
@@ -33,16 +51,19 @@ function ioMain(socket) {
       if (joinableRooms.length === 0) {
         room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
         socket.join(room)
+        db.sadd('currentrooms', room)
         return cb(null, room)
       }
 
       room = rooms[Math.floor(Math.random()*rooms.length)]
       socket.join(room.id)
+      updateLobby()
       return io.sockets.in(room.id).emit('join', socket.id)
     })
   })
 
   socket.on('leave', function (room, cb) {
+    console.log('LEAVE', room)
     socket.leave(room)
     stand(room, socket)
   })
@@ -65,9 +86,14 @@ function ioMain(socket) {
       if (res === 0) return cb('You are already sitting')
 
       io.sockets.in(room).emit('sat', socket.id, first ? 'red' : 'blue')
-      if (!first) startGame(room)
+      // if (!first) startGame(room)
+      updateLobby()
       cb()
     }
+  })
+
+  socket.on('playerReady', function (room, cb) {
+
   })
 
   socket.on('stand', function (room, cb) {
@@ -134,15 +160,17 @@ function ioMain(socket) {
 
   socket.on('disconnect', function () {
     var rooms = io.sockets.manager.roomClients[socket.id]
-
     Object.keys(rooms).forEach(function (room) {
       if (room === '') return
-
       stand(room, socket)
     })
-
   })
 
+}
+
+function updateLobby () {
+  console.log('updateLobby')
+  io.sockets.in('').emit('updateLobby')
 }
 
 function getRooms(cb) {
@@ -181,6 +209,7 @@ function stand(room, socket, cb) {
 
     io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
+    updateLobby()
     cb && cb()
   }
 }
@@ -199,5 +228,6 @@ function clearRoom(room) {
   multi.del([room, 'playedwords'].join(':'))
   multi.exec(function () {
     endGame(room)
+    updateLobby()
   })
 }

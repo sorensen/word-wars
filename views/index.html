@@ -46,13 +46,17 @@
       <div id="battle-mode">
         <div id="game" class="focus-">
           <div class="board" id="red-player">
+            <div class="word-list"></div>
             <button id="sit" class="btn btn-info expand">Sit</button>
             <button id="stand" class="btn expand">Stand</button>
-            <div class="player expand"><i class="icon icon-user"></i></div>
+            <button id="ready" class="btn btn-info expand">Ready</button>
+            <button class="player expand"><i class="icon icon-user"></i></button>
+            <div id="ready-overlay" class="expand"></div>
           </div>
 
           <div class="board" id="blue-player">
-            <div class="player expand"><i class="icon icon-user"></i></div>
+            <div class="word-list"></div>
+            <button class="btn player expand"><i class="icon icon-user"></i></button>
           </div>
 
           <div id="input-wrapper">
@@ -179,6 +183,7 @@
   <script src="/js/jquery-1.8.2.min.js"></script>
   <script src="/js/jquery-ui-1.9.1.custom.min.js"></script>
   <script src="/js/jquery.countdown.js"></script>
+  <script src="/js/jquery.lettering-0.6.1.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
