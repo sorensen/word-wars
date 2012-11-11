@@ -1,0 +1,29 @@
+<div class='game' data-id="<%= room %>">
+  <div>
+    <h5>Room <%= room %> <i><%= words %></i></h5>
+  </div>
+  <div class='red-player'>
+    <strong>Red:</strong> <span>
+    <% if (players[0]) { %>
+      <%= players[0].id.slice(0,12) %>
+    <% } else { %>
+      <button class='join red btn btn-mini btn-danger'>play</button>
+    <% } %>
+  </span>
+  </div>
+  <div class='blue-player'>
+    <strong>Blue:</strong> <span>
+    <% if (players[1]) { %>
+      <%= players[1].id.slice(0,12) %>
+    <% } else { %>
+      <button class='join blue btn btn-mini btn-info'>play</button>
+    <% } %>
+    </span>
+  </div>
+  <div class='watchers'>
+    <strong>Watching:</strong> <span><%= watchers %></span>
+  </div>
+  <div>
+    <button title='<%= room %>' class='join btn btn-inverse btn-small'>Join Room</button>
+  </div>
+</div>
