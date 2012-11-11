@@ -282,7 +282,7 @@
 
     this.clearBoard()
 
-    if (this.room.playing) return
+    if (this.room.playing && !this.isSitting) return
 
     this.$counter
       .show()
