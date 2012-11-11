@@ -50,7 +50,7 @@ var computer = {
   , word : function () {
     var randomWord = this.words[getRandomInt(0, this.words.length)]
     if (randomWord.length > this.length) 
-      return word()
+      return this.word()
     else
       return randomWord
   }
