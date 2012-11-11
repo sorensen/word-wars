@@ -5,7 +5,6 @@
   window.players = {}
 
   window.getPlayerName = function(pid) {
-    console.log('GET NAME: ', pid, '-', window.players[pid])
     return window.players[pid] || 'anonymous'
   }
 

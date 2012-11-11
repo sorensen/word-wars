@@ -277,7 +277,7 @@
 
 
     this.clearBoard()
-    
+
     this.$counter
       .show()
       .countdown({
@@ -481,8 +481,6 @@
     
     $('.player strong').html('')
     $('#red-player .player').hide()
-
-    console.log('updateSeats: ', pid, red, blue)
 
     // Both players sitting
     if (red && blue) {
