@@ -352,6 +352,7 @@ function getRoom(room, cb) {
     , clients: clients ? clients : []
     , players: []
     , playedWords: []
+    , playing: false
   }
 
   if (!clients || clients.length === 0) {
@@ -370,6 +371,7 @@ function getRoom(room, cb) {
       , wordMap = {}
 
     if (words) {
+      roomObj.playing = true
       words.forEach(function (word) {
         word = word.split(':')
         if (!wordMap[word[0]]) wordMap[word[0]] = []
