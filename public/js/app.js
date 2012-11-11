@@ -275,6 +275,9 @@
     }
     $('#blue-player .player-name span').html(getPlayerName(otherSeat))
 
+
+    this.clearBoard()
+    
     this.$counter
       .show()
       .countdown({
@@ -286,9 +289,7 @@
       , digitHeight: 77
       , timerEnd: function() {
           self.$counter.html('').hide()
-          self
-            .clearBoard()
-            .enableInput()
+          self.enableInput()
         }
       , image: imgPath
       })
