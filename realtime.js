@@ -17,6 +17,7 @@ module.exports = function (app) {
 var computer = {
     words : Object.keys(dictionary)
   , rooms : {}
+  , length : 6
   , tick : function () {
       var me = this
       Object.keys(me.rooms).forEach(function (room) {
@@ -24,13 +25,17 @@ var computer = {
       })
   }
   , beginAutoAttack : function (id) { 
-      this.rooms[id] = true
+      this.rooms[id] = {}
   } 
   , stopAutoAttack : function (id) { 
       this.rooms[id] = null
   }
   , word : function () {
-    return this.words[getRandomInt(0, this.words.length)]
+      var randomWord = this.words[getRandomInt(0, this.words.length)]
+      if (randomWord.length > this.length) 
+        return this.word()
+      else
+        return randomWord
   }
 }
 
@@ -51,7 +56,7 @@ function ioMain(socket) {
 
   io.sockets.sub.subscribe(session.id, io.sockets.in(session.id).emit.bind(io.sockets.in(session.id)))
 
-  socket.join(session.id)
+  // socket.join(session.id)
 
   socket.on('getSession', function (socketid, cb) {
     db.get('sess:' + getSessionId(socketid), cb)
