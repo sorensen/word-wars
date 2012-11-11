@@ -266,39 +266,38 @@
       , ten = height / 10
       , idx = $el.children().length
 
-    $({position: 0}).animate(
-        {
-          position: 90
-        }
-      , {
-            duration: timeout
-          , step: function (position) {
-              var idx = $word.index() * 10
-              console.log($word.index(), idx, position)
-              if (position > (90 - idx)) position = 90 - idx
-              $word.css({top: position + '%'})
-            }
-        }
-    )
+    $({
+      position: 0
+    }).animate({
+      position: 90
+    }, {
+      duration: timeout
+    , step: function (position) {
+        var idx = $word.index() * 10
+        console.log($word.index(), idx, position)
+        if (position > (90 - idx)) position = 90 - idx
+        $word.css({top: position + '%'})
+      }
+    })
   }
   Game.prototype.reStack = function ($el) {
     var timeout = 1500
     $el.children().each(function () {
       var $word = $(this)
-      var start = $word.index() * 10
-      $({position: start}).animate(
-          {
-            position: start + 90
-          }
-        , {
-              duration: timeout
-            , step: function (position) {
-                var idx = $word.index() * 10
-                if (position > (90 - idx)) position = 90 - idx
-                $word.css({top: position + '%'})
-              }
-          }
-      )
+        , start = $word.index() * 10
+
+      $({
+        position: start
+      }).animate({
+        position: start + 90
+      }, {
+        duration: timeout
+      , step: function (position) {
+          var idx = $word.index() * 10
+          if (position > (90 - idx)) position = 90 - idx
+          $word.css({top: position + '%'})
+        }
+      })
     })
   }
   Game.prototype.blocked = function(word, id) {
@@ -381,7 +380,6 @@
     return this.reset()
   }
   Game.prototype.sat = function(id, seat) {
-    console.log('sat: ', id, seat)
     if (id === this.pid) {
       this.isSitting = true
     }
@@ -443,7 +441,7 @@
     var self = this
     console.log('ready!')
       self.$readyOverlay.show()
-    this.send('ready', this.id, function(err) {
+    this.send('playerReady', this.id, function(err) {
       err && self.notify(err)
     })
     return this
@@ -455,7 +453,6 @@
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
 
-    console.log('updateSeats: ', pid, red, blue)
     // Both players sitting
     if (red && blue) {
       this.$sit.hide()

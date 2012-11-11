@@ -74,7 +74,13 @@ function ioMain(socket) {
   })
 
   socket.on('playerReady', function (room, cb) {
-
+    var key = room + ':readyplayers'
+    db.sadd(key, socket.id, function (err, res) {
+      db.scard(key, function (err, length) {
+        length >= 2 && startGame()
+      })
+      cb()
+    })
   })
 
   socket.on('stand', function (room, cb) {
@@ -136,7 +142,6 @@ function ioMain(socket) {
 
       cb(null)
     }
-
   })
 
   socket.on('disconnect', function () {
@@ -147,9 +152,7 @@ function ioMain(socket) {
 
       stand(room, socket)
     })
-
   })
-
 }
 
 function getRooms(cb) {
@@ -192,8 +195,16 @@ function stand(room, socket, cb) {
   }
 }
 
+function clearReady(room, cb) {
+  db.del(room + ':readyplayers', function(err) {
+    cb && cb()
+  })
+}
+
 function startGame(room) {
-  io.sockets.in(room).emit('start')
+  clearReady(room, function() {
+    io.sockets.in(room).emit('start')
+  })
 }
 
 function endGame(room) {
