@@ -100,6 +100,9 @@
     , 'ready'
     , 'over'
     ]
+    for (var i = 0; i !== self.listeners.length; i++) {
+      self.socket.removeAllListeners(self.listeners[i])
+    }
     this.socket.on('used',    function () { self.used.apply(self, arguments) })
     this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
@@ -151,6 +154,8 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
+
+    $('#is-ready-overlay').hide()
     word = word.toLowerCase().trim()
 
     var $word = $('<div><p>' + word + '</p></div>')
@@ -291,11 +296,17 @@
       , timerEnd: function() {
           self.$counter.html('').hide()
           self.clearBoard()
-          $('#is-ready-overlay').hide()
           self.enableInput()
+          $('#is-ready-overlay').hide()
+          setTimeout(function() {
+
+            $('#is-ready-overlay').hide()
+          }, 2000)
         }
       , image: imgPath
       })
+
+    $('#is-ready-overlay').hide()
     return this
   }
   Game.prototype.enableInput = function() {
@@ -399,7 +410,7 @@
     return this.seats[this.getSeat(seat)]
   }
   Game.prototype.playerReady = function(pid) {
-    if (pid !== this.pid) {
+    if (pid !== this.pid && !this.gameStarted) {
       this.$isReadyOverlay.show()
     }
     return this

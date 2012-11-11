@@ -28,7 +28,6 @@ var computer = {
         function gotUsers(err, users) {
           setTimeout(function () { 
             if (!me.rooms[room]) return
-            console.log('auto attack', me.rooms[room].nextAttackWave)
             autoAttack(room, me.word(), users[0], users[1])
             autoAttack(room, me.word(), users[1], users[0])
             // hackity hackity hack
@@ -89,21 +88,18 @@ function ioMain(socket) {
 
   socket.on('getPlayers', function(cb) {
     db.hgetall('players', function(err, players) {
-      console.log('ALL PLAYERS', players)
       cb(players)
     })
   })
 
   function sendPlayers() {
     db.hgetall('players', function(err, players) {
-      console.log('ALL PLAYERS', players)
       io.sockets.emit('players', players)
     })
   }
 
   socket.on('getScores', function (cb) {
     db.ZREVRANGEBYSCORE('highestScores', '+inf', '-inf', 'WITHSCORES LIMIT 0 10', function (err, replies) { 
-      console.log('scores', replies)
       cb(replies)
     })
   })
@@ -213,7 +209,6 @@ function ioMain(socket) {
     db.hgetall(key, getPlayers)
 
     function getPlayers(err, players) {
-      console.log('PLAYER READY: ', key, players)
       if (!players || !players[socket.id]) return cb('Not sitting in room')
 
       var playersReady = false
@@ -266,7 +261,6 @@ function ioMain(socket) {
     db.hkeys(key, gotPlayers2)
 
     function gotPlayers2(err, players) {
-      console.log('ATTACK GOT PLAYERS: ', key, players)
       if (!players) return cb('No players in this room')
 
       players.forEach(function (player) {
@@ -408,7 +402,6 @@ function getRoom(room, cb) {
 }
 
 function updateLobby () {
-  console.log('updateLobby')
   getRooms(function (err, rooms) {
     io.sockets.emit('updateLobby', rooms)
   })
