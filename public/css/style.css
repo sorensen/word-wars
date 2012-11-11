@@ -581,6 +581,10 @@ html, body {
 #is-ready-overlay, #game-overlay {
   cursor: default;
 }
+#is-ready-overlay span {
+  display: inline-block;
+  margin-top: 100px;
+}
 #game-overlay {
   z-index: 9;
 }
