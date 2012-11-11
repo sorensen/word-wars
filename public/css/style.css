@@ -604,7 +604,7 @@ html, body {
   font-weight: bold;
 }
 
-.board .btn span {
+.board .btn span, #game-overlay span {
   display: block;
   height: 40px;
   line-height: 40px;
