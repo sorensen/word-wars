@@ -256,6 +256,7 @@ function ioMain(socket) {
       }
 
       function gotCount(err, length) {
+        console.log('gotCount: ', length)
         if (length > 10) {
           io.sockets.in(room).emit('won', socket.id)
         } else {

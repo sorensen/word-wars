@@ -35,15 +35,16 @@
 
     this.$el.on('click', '.join', function(e) {
       var $button = $(this)
-        , id = $button.parent().data('id')
+        , $parent = $button.parent()
+        , id = $parent.data('id')
 
-      self.join(id)
+      self.join(id, $parent)
     })
 
-    $('.lobby').on('click', '.join-room', function (e) {
+    this.$el.on('click', '.join-room', function (e) {
       self.join(false)
     })
-    $('.lobby').on('click', '.create-room', function (e) {
+    this.$el.on('click', '.create-room', function (e) {
       //self.join(false)
     })
     this.socket = socket
@@ -82,8 +83,9 @@
     return this
   }
   // Join a game
-  Lobby.prototype.join = function(id) {
+  Lobby.prototype.join = function(id, $el) {
     this.game = new Game(this.socket, id).connect()
+
     this.$wrapper
       .removeClass('lobby')
       .addClass('battle')
@@ -100,7 +102,6 @@
   }
   Lobby.prototype.render = function(room) {
     var watchers = room.clients.length - room.players.length
-    
     watchers = watchers >= 0 ? watchers : 0
     
     var $html = $(views.roomBox({ 
@@ -109,7 +110,7 @@
     , watchers : watchers
     , words : '80'
     }))
-    console.log('render: ', $html, this.$gameList)
+    $html.data(room)
     this.$gameList.append($html)
     return this
   }

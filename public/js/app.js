@@ -108,8 +108,20 @@
 
     this.send('join', this.id, function(e, room) {
       if (e) return
+
+      console.log('JOINED ROOM: ', room)
       self.id = room.id
       self.room = room
+
+      for (var i = 0; i !== room.players.length; i++) {
+        var player = room.players[i]
+        self.seats[player.seat] = player.id
+      }
+      self.updateSeats()
+      for (var i = 0; i !== room.players.length; i++) {
+        var player = room.players[i]
+        player.ready && self.playerReady(player.id)
+      }
     })
     this.connected = true
     return this.updateSeats()
@@ -199,15 +211,21 @@
     word = word.toLowerCase().trim()
 
     if (me || this.getSeatByPlayer(id) === 'red') {
-      idx = this.playerWords[word].index()
-      this.playerWords[word].remove()
-      delete this.playerWords[word]
-      this.reStack(this.$red, idx)
+      var pWord = this.playerWords[word]
+      if (pWord) {
+        idx = pWord.index()
+        pWord.remove()
+        delete this.playerWords[word]
+        this.reStack(this.$red, idx)
+      }
     } else {
-      idx = this.opponentWords[word].index()
-      this.opponentWords[word].remove()
-      delete this.opponentWords[word]
-      this.reStack(this.$blue, idx)
+      var oWord = this.opponentWords[word]
+      if (oWord) {
+        idx = oWord.index()
+        oWord.remove()
+        delete this.opponentWords[word]
+        this.reStack(this.$blue, idx)
+      }
     }
     return this
   }
@@ -248,6 +266,7 @@
     return this
   }
   Game.prototype.won = function(pid) {
+    console.log('WON: ', pid)
     var self = this
       , me = this.pid === pid
       , msg
