@@ -148,7 +148,6 @@
     return this
   }
   Game.prototype.attacked = function(word, id) {
-    console.log('attacked: ', word)
     word = word.toLowerCase().trim()
 
     var $word = $('<div><p>' + word + '</p></div>')
@@ -162,6 +161,7 @@
       this.redWords[word] = $word
     }
     this.animate($el, $word)
+    this.updateSpacesLeft()
     return this
   }
   Game.prototype.animate = function($el, $word) {
@@ -213,6 +213,19 @@
       })
     })
   }
+  Game.prototype.updateSpacesLeft = function() {
+    var redLen = 10 - Object.keys(this.redWords).length
+      , blueLen = 10 - Object.keys(this.blueWords).length
+
+    if (this.isSitting && this.pid === this.seats.blue) {
+      $('#blue-player .spaces-left').html(redLen)
+      $('#red-player .spaces-left').html(blueLen)
+    } else {
+      $('#red-player .spaces-left').html(redLen)
+      $('#blue-player .spaces-left').html(blueLen)
+    }
+    return this
+  }
   Game.prototype.blocked = function(word, id) {
     var idx
 
@@ -233,11 +246,14 @@
         this.reStack(this.$blue, idx)
       }
     }
+    this.updateSpacesLeft()
     return this
   }
   // Start game, display countdown
   Game.prototype.start = function() {
     var self = this
+      , otherSeat = this.seats.blue
+
     this.isPlaying = this.isSitting
       ? true
       : false
@@ -247,11 +263,14 @@
     $('.player-name').show()
 
     if (this.isPlaying) {
-      $('#red-player .player-name').html('You')
+      if (this.pid === otherSeat) {
+        otherSeat = this.seats.red
+      }
+      $('#red-player .player-name span').html('You')
     } else {
-      $('#red-player .player-name').html(getPlayerName(this.seats.red))
+      $('#red-player .player-name span').html(getPlayerName(this.seats.red))
     }
-    $('#blue-player .player-name').html(getPlayerName(this.seats.blue))
+    $('#blue-player .player-name span').html(getPlayerName(otherSeat))
 
     this.$counter
       .show()
@@ -322,7 +341,6 @@
   }
   // Player has quit the game
   Game.prototype.quit = function() {
-    console.log('quit')
     var self = this
 
     if (this.isPlaying || this.isSitting) {
@@ -408,7 +426,6 @@
       return this
     }
     var self = this
-    console.log('ready!')
       self.$readyOverlay.show()
     this.send('playerReady', this.id, function(err) {
       err && self.notify(err)
@@ -429,7 +446,6 @@
 
     // Both players sitting
     if (red && blue) {
-      console.log('two sitting')
       this.$sit.hide()
       var forOther = blue
       if (pid === blue) {
@@ -443,12 +459,10 @@
     } else if (red || blue) {
       // You are sitting
       if (pid === blue || pid === red) {
-        console.log('only you sitting')
         $other.hide()
         this.$sit.hide()
       // Someone else is sitting
       } else {
-        console.log('someone else sitting: ', red, blue)
         $other.show().find('span').html(getPlayerName(red || blue))
         this.$sit.show()
         this.$ready.hide()
@@ -484,6 +498,9 @@
     this.$ready.hide()
     this.$readyOverlay.hide()
     this.$isReadyOverlay.hide()
+    this.redWords = {}
+    this.blueWords = {}
+    $('.spaces-left').html('10')
     $('.word-list').html('')
     return this
   }

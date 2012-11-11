@@ -158,7 +158,7 @@ html, body {
 #inner {
   top: 60px;
   bottom: 25px;
-  bottom: 65px;
+  bottom: 5px;
   overflow-y: scroll;
 }
   #battle-mode {
@@ -452,6 +452,32 @@ html, body {
     font-weight: bold;
     text-shadow: 0 1px 0 #ffffff;
   }
+  .spaces-left {
+    position: absolute;
+    top: -6px;
+    right: 6px;
+    height: 50px;
+    min-width: 34px;
+    line-height: 49px;
+    background: #BBB;
+    padding: 0 8px;
+    -webkit-border-radius: 31px;
+    -moz-border-radius: 31px;
+    border-radius: 31px;
+    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+    -moz-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.8);
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    font-size: 22px;
+  }
+    #red-player .spaces-left {
+      left: -6px;
+      right: auto;
+    }
+
   .word-list {
     position: absolute;
     top: 40px;
