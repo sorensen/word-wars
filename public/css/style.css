@@ -108,6 +108,8 @@ html, body {
 #wrapper {
   top: 0;
   bottom: 0;
+  min-height: 470px;
+  min-width: 600px;
 }
 .color-strip {
   height: 5px;
