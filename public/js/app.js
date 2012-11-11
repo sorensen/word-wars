@@ -255,25 +255,51 @@
     return this
   }
   Game.prototype.animate = function($el, $word) {
-    var height = $el.height()
+    $el.append($word)
+    this.word($word, $el)
+    $word.lettering()
+    return this
+  }
+  Game.prototype.word = function($word, $el) {
+    var timeout = 1500
+      , height = $el.height()
       , ten = height / 10
       , idx = $el.children().length
 
-    this.word($word, idx)
-    $word.lettering()
-    $el.prepend($word)
-    return this
+    $({position: 0}).animate(
+        {
+          position: 90
+        }
+      , {
+            duration: timeout
+          , step: function (position) {
+              var idx = $word.index() * 10
+              console.log($word.index(), idx, position)
+              if (position > (90 - idx)) position = 90 - idx
+              $word.css({top: position + '%'})
+            }
+        }
+    )
   }
-  Game.prototype.word = function($el, idx) {
-    var top = (9 - idx)
-      , timeout = 1500
-
-    $el
-      .animate({
-        top: top * 10 + '%'
-      }, timeout, 'linear', function() {
-
-      })
+  Game.prototype.reStack = function ($el) {
+    var timeout = 1500
+    $el.children().each(function () {
+      var $word = $(this)
+      var start = $word.index() * 10
+      $({position: start}).animate(
+          {
+            position: start + 90
+          }
+        , {
+              duration: timeout
+            , step: function (position) {
+                var idx = $word.index() * 10
+                if (position > (90 - idx)) position = 90 - idx
+                $word.css({top: position + '%'})
+              }
+          }
+      )
+    })
   }
   Game.prototype.blocked = function(word, id) {
     var me = id === this.pid
@@ -283,9 +309,11 @@
     if (me) {
       this.playerWords[word].remove()
       delete this.playerWords[word]
+      this.reStack(this.$red)
     } else {
       this.opponentWords[word].remove()
       delete this.opponentWords[word]
+      this.reStack(this.$blue)
     }
     return this.stack()
   }
