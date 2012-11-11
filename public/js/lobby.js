@@ -79,9 +79,7 @@
     var self = this
     this.Sessions = new Sessions().display()
 
-    if (window.location.hash && window.location.hash.length > 0) {
-      self.join(window.location.hash.split('#')[1])
-    }
+    $win.hashchange()
 
     // this.HighScores = window.HighScores.display()
     this.socket.emit('getPlayers', function(players) {
@@ -114,6 +112,7 @@
   }
   // Join a game
   Lobby.prototype.join = function(id, $el, autoSit, priv) {
+    if (this.game) return
     this.game = new Game(this.socket, id, autoSit, priv).connect()
     this.$wrapper
       .removeClass('lobby')

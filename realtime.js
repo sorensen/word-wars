@@ -27,6 +27,7 @@ var computer = {
         db.hkeys(key, gotUsers)
         function gotUsers(err, users) {
           setTimeout(function () { 
+            if (!me.rooms[room]) return
             console.log('auto attack', me.rooms[room].nextAttackWave)
             autoAttack(room, me.word(), users[0], users[1])
             autoAttack(room, me.word(), users[1], users[0])
