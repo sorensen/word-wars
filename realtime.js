@@ -14,6 +14,7 @@ module.exports = function (app) {
   io.sockets.sub.auth(app.settings.redis.auth)
 }
 
+
 var computer = {
     words : Object.keys(dictionary)
   , rooms : {}
@@ -230,10 +231,10 @@ function ioMain(socket) {
     var key = [room, 'currentplayers'].join(':')
       , otherPlayer
 
-    db.hkeys(key, gotPlayers)
+    db.hkeys(key, gotPlayers2)
 
 
-    function gotPlayers(err, players) {
+    function gotPlayers2(err, players) {
       console.log('ATTACK GOT PLAYERS: ', key, players)
       if (!players) return cb('No players in this room')
 
@@ -283,6 +284,7 @@ function attack(room, word, attacker, defender, cb) {
     }
 
     var key = [room, 'currentwords'].join(':')
+    console.log('GET COUNT: ', key, defender + ':' + word)
     db.multi()
       .sadd(key, defender + ':' + word)
       .smembers(key, gotCount)
@@ -290,6 +292,7 @@ function attack(room, word, attacker, defender, cb) {
   }
 
   function gotCount(err, words) {
+    console.log('GOT COUNT: ', words)
     words || (words = [])
     var length = 0
     words.forEach(function (word) {
