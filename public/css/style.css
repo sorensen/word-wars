@@ -402,7 +402,7 @@ html, body {
   }
 
 
-#sit, #stand, #ready, #ready-overlay, #game .player {
+#sit, #stand, #ready, #ready-overlay, #is-ready-overlay, #game .player {
   display: none;
 }
 
@@ -421,7 +421,10 @@ html, body {
 #ready {
   bottom: 21%;
 }
-#ready-overlay {
+#is-ready-overlay {
+  cursor: normal;
+}
+.overlay {
   z-index: 9;
   opacity: 0.7;
   background: #fff;

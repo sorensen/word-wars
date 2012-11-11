@@ -153,6 +153,7 @@
     this.$stand = $('#stand')
     this.$ready = $('#ready')
     this.$readyOverlay = $('#ready-overlay')
+    this.$isReadyOverlay = $('#is-ready-overlay')
 
     this.reset()
     // Permanently focus the game input
@@ -216,6 +217,7 @@
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
     this.socket.on('stood',   function () { self.stood.apply(self, arguments) })
+    this.socket.on('ready',   function () { self.playerReady.apply(self, arguments) })
 
     this.send('join', this.id, function(e, room) {
       if (e) return
@@ -410,6 +412,12 @@
   Game.prototype.getPlayer = function(seat) {
     return this.seats[this.getSeat(seat)]
   }
+  Game.prototype.playerReady = function(pid) {
+    if (pid !== this.pid) {
+      this.$isReadyOverlay.show()
+    }
+    return this
+  }
 
   // Game actions
   // ------------
@@ -499,6 +507,7 @@
     this.$stand.hide()
     this.$ready.hide()
     this.$readyOverlay.hide()
+    this.$isReadyOverlay.hide()
     $('.word-list').html('')
     return this
   }
