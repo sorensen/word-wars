@@ -22,6 +22,7 @@ function ioMain(socket) {
   socket.on('join', function (room, cb) {
     if (room) {
       socket.join(room)
+      db.sadd('currentrooms', room)
       return io.sockets.in(room).emit('join', socket.id)
     }
 
@@ -33,6 +34,7 @@ function ioMain(socket) {
       if (joinableRooms.length === 0) {
         room = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4)
         socket.join(room)
+        db.sadd('currentrooms', room)
         return cb(null, room)
       }
 
