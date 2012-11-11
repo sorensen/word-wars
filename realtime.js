@@ -18,7 +18,7 @@ module.exports = function (app) {
 var computer = {
     words : Object.keys(dictionary)
   , rooms : {}
-  , length : 6
+  , length : 10
   , tick : function () {
       var me = this
         , rooms = Object.keys(me.rooms)
@@ -42,17 +42,17 @@ var computer = {
       }
   }
   , beginAutoAttack : function (id) { 
-      this.rooms[id] = {}
+      this.rooms[id] = true
   } 
   , stopAutoAttack : function (id) { 
       delete this.rooms[id]
   }
   , word : function () {
-      var randomWord = this.words[getRandomInt(0, this.words.length)]
-      if (randomWord.length > this.length) 
-        return this.word()
-      else
-        return randomWord
+    var randomWord = this.words[getRandomInt(0, this.words.length)]
+    if (randomWord.length > this.length) 
+      return this.word()
+    else
+      return randomWord
   }
 }
 
@@ -471,3 +471,29 @@ function clearRoom(room) {
     updateLobby()
   })
 }
+
+// Clear unused rooms from db
+setInterval(function () {
+  var multi = db.multi()
+
+  db.smembers('currentrooms', gotRooms)
+
+  function gotRooms(err, rooms) {
+    async.forEach(rooms, iterate, done)
+  }
+
+  function iterate(room, cb) {
+    var clients = io.sockets.manager.rooms['/' + room]
+    if (!clients || clients.length === 0) {
+      multi.del([room, 'currentwords'].join(':'))
+      multi.del([room, 'playedwords'].join(':'))
+      multi.del([room, 'currentplayers'].join(':'))
+      multi.srem('currentrooms', room)
+    }
+    cb()
+  }
+
+  function done() {
+    multi.exec()
+  }
+}, 10 * 60 * 1000)
