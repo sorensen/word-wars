@@ -289,6 +289,8 @@
       , digitHeight: 77
       , timerEnd: function() {
           self.$counter.html('').hide()
+          self.clearBoard()
+          $('#is-ready-overlay').hide()
           self.enableInput()
         }
       , image: imgPath
@@ -484,6 +486,7 @@
 
     // Both players sitting
     if (red && blue) {
+      $('#vs').show()
       this.$sit.hide()
       var forOther = blue
       if (pid === blue) {
@@ -541,6 +544,8 @@
     this.blueWords = {}
     $('.spaces-left').html('10')
     $('.word-list').html('')
+    $('#is-ready-overlay').hide()
+    $('#vs').hide()
     return this
   }
   Game.prototype.attack = function(word) {

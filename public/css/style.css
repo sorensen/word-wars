@@ -85,6 +85,27 @@ body, input, button, textarea, select {
     border-top: 1px solid #B2E0F0;
   }
 
+
+#vs {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 70px;
+  z-index: 999;
+  margin-left: -50px;
+  margin-top: -60px;
+  text-align: center;
+  font-size: 90px;
+  font-weight: bold;
+  font-style: italic;
+  text-shadow: 1px 1px 0px black;
+  line-height: 70px;
+  letter-spacing: -10px;
+  color: #09C;
+}
+
 /* =============================================================================
    Layout
    ========================================================================== */
@@ -594,6 +615,9 @@ html, body {
   width: 40px;
   height: 40px;
   padding-top: 7px;
+}
+.player {
+  cursor: default !important;
 }
 
 .expand {  
