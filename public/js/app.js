@@ -103,7 +103,7 @@
     this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
     this.socket.on('autoattack',  function () { self.attack.apply(self, arguments) })
-    this.socket.on('players', function () { self.players.apply(self, arguments) })
+    this.socket.on('players', function () { self.setPlayers.apply(self, arguments) })
     this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
     this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
@@ -135,7 +135,8 @@
     this.socket.emit.apply(this.socket, arguments)
     return this
   }
-  Game.prototype.players = function() {
+  Game.prototype.setPlayers = function(players) {
+    window.players = players
     return this
   }
   Game.prototype.used = function() {
@@ -243,11 +244,10 @@
 
     if (this.isPlaying) {
       $('#red-player .player-name').html('You')
-      $('#blue-player .player-name').html('Opponent')
     } else {
-      $('#red-player .player-name').html(this.seats.red)
-      $('#blue-player .player-name').html(this.seats.blue)
+      $('#red-player .player-name').html(getPlayerName(this.seats.red))
     }
+    $('#blue-player .player-name').html(getPlayerName(this.seats.blue))
 
     this.$counter
       .show()
@@ -283,24 +283,26 @@
       , me = this.pid === pid
       , msg
 
-    this.notify('Player ' + pid + ' won!')
+    this.notify('Player ' + getPlayerName(pid) + ' won!')
 
     if (this.isPlaying) {
       msg = me
         ? 'Victory'
         : 'Defeat'
-
-      this.$gameOverlay.show().html(msg)
-      this.clearBoard()
-
-      this.tick = setTimeout(function() {
-        self.$gameOverlay
-          .html('Game Over')
-          .fadeOut(5000, function() {
-            self.over()
-          })
-      }, 5 * 1000)
+    } else {
+      msg = getPlayerName(pid) + ' won'
     }
+
+    this.$gameOverlay.show().html(msg)
+    this.clearBoard()
+
+    this.tick = setTimeout(function() {
+      self.$gameOverlay
+        .html('Game Over')
+        .fadeOut(5000, function() {
+          self.over()
+        })
+    }, 5 * 1000)
     return this
   }
   Game.prototype.over = function() {
@@ -415,22 +417,35 @@
       , red = this.seats.red
       , blue = this.seats.blue
       , $other = this.$el.find('#blue-player .player')
+    
+    $('.player span').html('')
+    $('#red-player .player').hide()
 
     console.log('updateSeats: ', pid, red, blue)
 
     // Both players sitting
     if (red && blue) {
+      console.log('two sitting')
       this.$sit.hide()
-      $other.show()
+      var forOther = blue
+      if (pid === blue) {
+        forOther = red
+      }
+      $other.show().find('span').html(getPlayerName(forOther))
+      if (!this.isSitting) {
+        $('#red-player .player').show().find('span').html(getPlayerName(red))
+      }
     // One player sitting
     } else if (red || blue) {
       // You are sitting
       if (pid === blue || pid === red) {
+        console.log('only you sitting')
         $other.hide()
         this.$sit.hide()
       // Someone else is sitting
       } else {
-        $other.show()
+        console.log('someone else sitting: ', red, blue)
+        $other.show().find('span').html(getPlayerName(red || blue))
         this.$sit.show()
         this.$ready.hide()
         this.$stand.hide()

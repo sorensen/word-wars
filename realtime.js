@@ -74,8 +74,26 @@ function ioMain(socket) {
         name : sess.name || 'anonymous'
       }
       cb(null, user)
+
+      db.hset('players', socket.id, user.name, function(err) {
+        sendPlayers()
+      })
     })
   })
+
+  socket.on('getPlayers', function(cb) {
+    db.hgetall('players', function(err, players) {
+      console.log('ALL PLAYERS', players)
+      cb(players)
+    })
+  })
+
+  function sendPlayers() {
+    db.hgetall('players', function(err, players) {
+      console.log('ALL PLAYERS', players)
+      io.sockets.in('').emit('players', players)
+    })
+  }
 
   socket.on('getScores', function (cb) {
     db.ZREVRANGEBYSCORE('highestScores', '+inf', '-inf', 'WITHSCORES LIMIT 0 10', function (err, replies) { 
@@ -94,6 +112,9 @@ function ioMain(socket) {
       user.name = name
       db.set('sess:' + session.id, JSON.stringify(user), function (err) {
         cb()
+      })
+      db.hset('players', socket.id, user.name, function(err) {
+        sendPlayers()
       })
     })
   })

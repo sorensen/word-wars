@@ -426,6 +426,7 @@ html, body {
     left: auto;
   }
   .player-name {
+    display: none;
     position: absolute;
     top: 5px;
     height: 35px;
@@ -555,6 +556,11 @@ html, body {
 
 #game-overlay, #sit, #stand, #ready, #ready-overlay, #is-ready-overlay, #game .player {
   display: none;
+}
+.player i {
+  width: 40px;
+  height: 40px;
+  padding-top: 7px;
 }
 
 .expand {  

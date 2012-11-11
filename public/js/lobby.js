@@ -2,6 +2,13 @@
 ;(function() {
   'use strict'
 
+  window.players = {}
+
+  window.getPlayerName = function(pid) {
+    console.log('GET NAME: ', pid, '-', window.players[pid])
+    return window.players[pid] || 'anonymous'
+  }
+
   var $doc = $(document)
     , $win = $(window)
     , $body = $('body')
@@ -67,11 +74,17 @@
     var self = this
     this.Sessions = new Sessions().display()
     // this.HighScores = window.HighScores.display()
-    self.getRooms()
+    this.socket.emit('getPlayers', function(players) {
+      window.players = players
+      self.getRooms()
+    })
     this.socket.on('updateLobby', function () {
       // self.HighScores.display()
       self.getRooms()
-    })  
+    })
+    this.socket.on('players', function(players) {
+      window.players = players
+    })
     return this
   }
   Lobby.prototype.getRooms = function() {

@@ -2,7 +2,7 @@
   <div class='red-player'>
     <strong>Red:</strong> <span>
     <% if (players[0]) { %>
-      <%= players[0].id.slice(0,12) %>
+      <%= getPlayerName(players[0].id) %>
     <% } else { %>
       <span class='open-slot'>Open</span>
     <% } %>
@@ -11,7 +11,7 @@
   <div class='blue-player'>
     <strong>Blue:</strong> <span>
     <% if (players[1]) { %>
-      <%= players[1].id.slice(0,12) %>
+      <%= getPlayerName(players[1].id) %>
     <% } else { %>
       <span class='open-slot'>Open</span>
     <% } %>
