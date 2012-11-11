@@ -109,14 +109,7 @@
       , watchers : watchers
       , words : '80'
     }))
-
-    // If the room does not exist, create it
-    // if (!$room || !$room.length) {
-      this.$el.append($html)
-    // } else {
-      // $room.replaceWith($html)
-      // this.update($room, $html)
-    // }
+    this.$el.append($html)
   }
   Lobby.prototype.refresh = function() {
     return this
