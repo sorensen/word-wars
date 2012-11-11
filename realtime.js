@@ -43,6 +43,7 @@ function ioMain(socket) {
   })
 
   socket.on('leave', function (room, cb) {
+    console.log('LEAVE', room)
     socket.leave(room)
     stand(room, socket)
   })
@@ -65,9 +66,13 @@ function ioMain(socket) {
       if (res === 0) return cb('You are already sitting')
 
       io.sockets.in(room).emit('sat', socket.id, first ? 'red' : 'blue')
-      if (!first) startGame(room)
+      // if (!first) startGame(room)
       cb()
     }
+  })
+
+  socket.on('playerReady', function (room, cb) {
+
   })
 
   socket.on('stand', function (room, cb) {
