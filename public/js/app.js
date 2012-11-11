@@ -26,6 +26,7 @@
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
     this.$el = $('#lobby-mode')
+    this.$fullscreen = $('#fullscreen')
 
     $win.unload(function() {
       self.game && self.game.quit()
@@ -49,6 +50,7 @@
     this.socket.on('connect', function() { 
       self.connect() 
     })
+    this.$fullscreen.click(function() { self.fullscreen() })
   }
   // Home screen
   Lobby.prototype.home = function() {
@@ -125,6 +127,29 @@
   }
   // Refresh all games in the view
   Lobby.prototype.refresh = function() {
+    return this
+  }
+
+  Lobby.prototype.fullscreen = function() {
+    if (this.isFullscreen) {
+      this.isFullscreen = false
+      
+      this.$fullscreen
+        .removeClass('icon-resize-small')
+        .addClass('icon-resize-full')
+      
+      this.$wrapper
+        .removeClass('fullscreen')
+    } else {
+      this.isFullscreen = true
+      
+      this.$fullscreen
+        .addClass('icon-resize-small')
+        .removeClass('icon-resize-full')
+      
+      this.$wrapper
+        .addClass('fullscreen')
+    }
     return this
   }
 
