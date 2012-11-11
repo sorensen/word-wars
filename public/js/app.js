@@ -32,7 +32,7 @@
     this.game = null
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
-    this.$el = $('#lobby-mode')
+    this.$el = $('.lobby-mode')
 
     $win.unload(function() {
       self.game && self.game.quit()
@@ -40,17 +40,17 @@
     this.$home.click(function() { self.home() })
 
     this.$el.on('click', '.join', function(e) {
-      var $el = $(this)
-        , id = $el.parent().data('id')
+      var $button = $(this)
+        , id = $button.parent().data('id')
 
       self.join(id)
     })
 
-    this.$el.on('click', '.join-room', function (e) {
+    $('.lobby').on('click', '.join-room', function (e) {
       self.join(false)
     })
 
-    this.$el.on('click', '.create-room', function (e) {
+    $('.lobby').on('click', '.create-room', function (e) {
       //self.join(false)
     })
 
@@ -98,26 +98,22 @@
   }
   // Render all rooms
   Lobby.prototype.render = function(room) {
-    var $el = this.$el.find('[data-id="' + room.id + '"]')
+    var $room = this.$el.find('[data-id="' + room.id + '"]')
 
     // If the room does not exist, create it
-    if (!$el || !$el.length) {
-      var players = room.players.length
-        , watchers = room.clients.length - room.players.length
-
+    if (!$room || !$room.length) {
+      var watchers = room.clients.length - room.players.length
       watchers = watchers >= 0 ? watchers : 0
-      $el = $(''
-        + '<div class="game" data-id="' + room.id + '">'
-        + '  <button class="join btn btn-info btn-small">Join</button>'
-        + '  <div class="host"><span>Host:</span> Some Host</div>'
-        + '  <div class="blue-player"><span>Players:</span> ' + players + '</div>'
-        + '  <div class="watchers"><span>Watchers:</span> ' + watchers + '</div>'
-        + '  <div class="words"><span>Words:</span> 80</div>'
-        + '</div>'
-      )
-      this.$el.append($el)
+      $room = $(views.roomBox({ 
+          room : room.id
+        , players : room.players
+        , watchers : watchers
+        , words : '80'
+      }))
+
+      this.$el.append($room)
     } else {
-      this.update($el, room)
+      this.update($room, room)
     }
   }
   // Update room information
