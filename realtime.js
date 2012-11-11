@@ -28,15 +28,18 @@ var computer = {
 
         db.hkeys(key, gotUsers)
 
-        function gotUsers(err, users, origIdx) {
-          var idx = origIdx || getRandomInt(0, 1)
-            , attacker = users[idx]
-            , defender = users[idx === 0 ? 1 : 0]
-          attack(room, me.word(), attacker, defender, function (err) {
-            if (err) gotUsers(null, users, idx)
-          }, true)
+        function gotUsers(err, users) {
+          autoAttack(room, me.word(), users[0], users[1])
+          autoAttack(room, me.word(), users[1], users[0])
         }
+
       })
+
+      function autoAttack(room, word, attacker, defender) {
+        attack(room, word, attacker, defender, function (err) {
+          if (err) autoAttack(room, word, attacker, defender)
+        }, true)
+      }
   }
   , beginAutoAttack : function (id) { 
       this.rooms[id] = {}
@@ -428,9 +431,9 @@ function resetReady(room, cb) {
 
 function startGame(room) {
   io.sockets.in(room).emit('start')
-  setTimeout(function() {
+  setTimeout(function () {
     computer.beginAutoAttack(room)
-  }, 10 * 1000)
+  }, 4 * 1000)]
 }
 
 function endGame(room) {
