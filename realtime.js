@@ -127,7 +127,6 @@ function ioMain(socket) {
   })
 
   socket.on('leave', function (room, cb) {
-    console.log('LEAVE', room)
     socket.leave(room)
     stand(room, socket)
   })
@@ -140,6 +139,7 @@ function ioMain(socket) {
     db.hlen(key, gotSitting)
 
     function gotSitting(err, length) {
+      console.log('SITTING CHECK: ', key, length)
       if (length >= 2) return cb('There are no seats left')
 
       if (length === 0) first = true

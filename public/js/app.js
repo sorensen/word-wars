@@ -16,13 +16,14 @@
   // Game Engine
   // ===========
 
-  function Game(socket, id) {
+  function Game(socket, id, autoSit) {
     var self = this
 
     this.socket = socket
     this.id = id
     this.listeners = []
     this.seats = {}
+    this.autoSit = autoSit
 
     // Cache selectors
     this.$el = $('#battle-mode')
@@ -111,7 +112,6 @@
     this.send('join', this.id, function(e, room) {
       if (e) return
 
-      console.log('JOINED ROOM: ', room)
       self.id = room.id
       self.room = room
 
@@ -124,6 +124,7 @@
         var player = room.players[i]
         player.ready && self.playerReady(player.id)
       }
+      self.autoSit && self.sit()
     })
     this.connected = true
     return this.updateSeats()
