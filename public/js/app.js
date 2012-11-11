@@ -68,8 +68,8 @@
     this.words = {}
     this.players = {}
     this.pid = null
-    this.playerWords = {}
-    this.opponentWords = {}
+    this.redWords = {}
+    this.blueWords = {}
     this.seats = {}
     return this.disableInput()
   }
@@ -99,7 +99,7 @@
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
     this.socket.on('autoattack',  function () { self.attack.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
-    this.socket.on('block',   function () { self.block.apply(self, arguments) })
+    this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
     this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
@@ -144,17 +144,15 @@
   Game.prototype.attacked = function(word, id) {
     word = word.toLowerCase().trim()
 
-    // var currentPlayer = !!id // for auto attacking
+    var $word = $('<div><p>' + word + '</p></div>')
+      , $el
 
-    var currentPlayer = (id === this.pid)
-
-    var $el = currentPlayer ? this.$blue : this.$red
-      , $word = $('<div><p>' + word + '</p></div>')
-
-    if (currentPlayer || this.getSeatByPlayer(id) === 'red') {
-      this.opponentWords[word] = $word
+    if (this.getSeatByPlayer(id) === 'red') {
+      $el = this.$blue
+      this.blueWords[word] = $word
     } else {
-      this.playerWords[word] = $word
+      $el = this.$red
+      this.redWords[word] = $word
     }
     this.animate($el, $word)
     return this
@@ -204,26 +202,25 @@
       })
     })
   }
-  Game.prototype.block = function(word, id) {
-    var me = id === this.pid
-      , idx
+  Game.prototype.blocked = function(word, id) {
+    var idx
 
     word = word.toLowerCase().trim()
 
-    if (me || this.getSeatByPlayer(id) === 'red') {
-      var pWord = this.playerWords[word]
+    if (this.getSeatByPlayer(id) === 'red') {
+      var pWord = this.redWords[word]
       if (pWord) {
         idx = pWord.index()
         pWord.remove()
-        delete this.playerWords[word]
+        delete this.redWords[word]
         this.reStack(this.$red, idx)
       }
     } else {
-      var oWord = this.opponentWords[word]
+      var oWord = this.blueWords[word]
       if (oWord) {
         idx = oWord.index()
         oWord.remove()
-        delete this.opponentWords[word]
+        delete this.blueWords[word]
         this.reStack(this.$blue, idx)
       }
     }
@@ -316,6 +313,12 @@
   Game.prototype.sat = function(id, seat) {
     if (id === this.pid) {
       this.isSitting = true
+      if (this.getSeat(seat) === 'blue') {
+        this.$red = $('#blue-player .word-list')
+        this.$blue = $('#red-player .word-list')
+        this.$redSeat = $('#blue-seat')
+        this.$blueSeat = $('#red-seat')
+      }
     }
     this.seats[this.getSeat(seat)] = id
     return this.updateSeats()
@@ -446,20 +449,6 @@
     $('.word-list').html('')
     return this
   }
-  Game.prototype.stack = function() {
-    var self = this
-
-    ;[this.$red.children()
-    , this.$blue.children()
-    ].forEach(function($els) {
-      var len = $els.length
-
-      $els.each(function(key, val) {
-        self.word($(val), len - key - 1)
-      })
-    })
-    return this
-  }
   Game.prototype.attack = function(word) {
     var self = this
     if (!this.enabled) return
@@ -480,7 +469,13 @@
   }
   Game.prototype.highlight = function() {
     var val = this.$input.val()
-      , words = this.playerWords
+      , words
+
+    if (this.getSeatByPlayer(this.pid) === 'red') {
+      words = this.redWords
+    } else {
+      words = this.blueWords
+    }
 
     for (var word in words) {
       var $word = words[word]

@@ -228,7 +228,7 @@ function ioMain(socket) {
         return cb('Invalid word')
       }
 
-      db.srem([room, 'currentwords'].join(':'), socket.id + word, checkPlayerWords)
+      db.srem([room, 'currentwords'].join(':'), socket.id + ':' + word, checkPlayerWords)
 
       function checkPlayerWords(err, res) {
         if (err) return cb('Error checking word')
@@ -250,15 +250,20 @@ function ioMain(socket) {
 
         var key = [room, 'currentwords'].join(':')
         db.multi()
-          .sadd(key, otherPlayer + word)
-          .scard(key, gotCount)
+          .sadd(key, otherPlayer + ':' + word)
+          .smembers(key, gotCount)
           .exec()
       }
 
-      function gotCount(err, length) {
-        console.log('gotCount: ', length)
+      function gotCount(err, words) {
+        var length = 0
+        words.forEach(function (word) {
+          word = word.split(':')
+          if (word[0] !== socket.id) length += 1
+        })
         if (length > 10) {
           io.sockets.in(room).emit('won', socket.id)
+          clearRoom(room)
         } else {
           io.sockets.in(room).emit('attack', word, socket.id)
         }
