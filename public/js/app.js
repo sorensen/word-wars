@@ -209,8 +209,8 @@
     this.words = {}
     this.players = {}
     this.pid = null
-    this.playerWords = {}
-    this.opponentWords = {}
+    this.redWords = {}
+    this.blueWords = {}
     this.seats = {}
     return this.disableInput()
   }
@@ -272,14 +272,15 @@
   Game.prototype.attacked = function(word, id) {
     word = word.toLowerCase().trim()
 
-    var me = id === this.pid
-      , $el = me ? this.$blue : this.$red
-      , $word = $('<div><p>' + word + '</p></div>')
+    var $word = $('<div><p>' + word + '</p></div>')
+      , $el
 
-    if (me || this.getSeatByPlayer(id) === 'red') {
-      this.opponentWords[word] = $word
+    if (this.getSeatByPlayer(id) === 'red') {
+      $el = this.$blue
+      this.blueWords[word] = $word
     } else {
-      this.playerWords[word] = $word
+      $el = this.$red
+      this.redWords[word] = $word
     }
     this.animate($el, $word)
     return this
@@ -330,20 +331,19 @@
     })
   }
   Game.prototype.blocked = function(word, id) {
-    var me = id === this.pid
-      , idx
+    var idx
 
     word = word.toLowerCase().trim()
 
-    if (me || this.getSeatByPlayer(id) === 'red') {
-      idx = this.playerWords[word].index()
-      this.playerWords[word].remove()
-      delete this.playerWords[word]
+    if (this.getSeatByPlayer(id) === 'red') {
+      idx = this.redWords[word].index()
+      this.redWords[word].remove()
+      delete this.redWords[word]
       this.reStack(this.$red, idx)
     } else {
-      idx = this.opponentWords[word].index()
-      this.opponentWords[word].remove()
-      delete this.opponentWords[word]
+      idx = this.blueWords[word].index()
+      this.blueWords[word].remove()
+      delete this.blueWords[word]
       this.reStack(this.$blue, idx)
     }
     return this
@@ -434,6 +434,12 @@
   Game.prototype.sat = function(id, seat) {
     if (id === this.pid) {
       this.isSitting = true
+      if (this.getSeat(seat) === 'blue') {
+        this.$red = $('#blue-player .word-list')
+        this.$blue = $('#red-player .word-list')
+        this.$redSeat = $('#blue-seat')
+        this.$blueSeat = $('#red-seat')
+      }
     }
     this.seats[this.getSeat(seat)] = id
     return this.updateSeats()
@@ -562,20 +568,6 @@
     $('.word-list').html('')
     return this
   }
-  Game.prototype.stack = function() {
-    var self = this
-
-    ;[this.$red.children()
-    , this.$blue.children()
-    ].forEach(function($els) {
-      var len = $els.length
-
-      $els.each(function(key, val) {
-        self.word($(val), len - key - 1)
-      })
-    })
-    return this
-  }
   Game.prototype.attack = function(word) {
     var self = this
 
@@ -596,7 +588,13 @@
   }
   Game.prototype.highlight = function() {
     var val = this.$input.val()
-      , words = this.playerWords
+      , words
+
+    if (this.getSeatByPlayer(this.pid) === 'red') {
+      words = this.redWords
+    } else {
+      words = this.blueWords
+    }
 
     for (var word in words) {
       var $word = words[word]
