@@ -17,7 +17,7 @@ module.exports = function (app) {
 var computer = {
     words : Object.keys(dictionary)
   , rooms : {}
-  , length : 6
+  , length : 10
   , tick : function () {
       var me = this
       Object.keys(me.rooms).forEach(function (room) {
@@ -25,17 +25,17 @@ var computer = {
       })
   }
   , beginAutoAttack : function (id) { 
-      this.rooms[id] = {}
+      this.rooms[id] = true
   } 
   , stopAutoAttack : function (id) { 
       this.rooms[id] = null
   }
   , word : function () {
-      var randomWord = this.words[getRandomInt(0, this.words.length)]
-      if (randomWord.length > this.length) 
-        return this.word()
-      else
-        return randomWord
+    var randomWord = this.words[getRandomInt(0, this.words.length)]
+    if (randomWord.length > this.length) 
+      return word()
+    else
+      return randomWord
   }
 }
 
