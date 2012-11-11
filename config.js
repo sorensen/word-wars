@@ -11,9 +11,8 @@ module.exports = function (app) {
 
   app.configure('development', function () {
     app.set('redis', {
-        host: 'nodejitsudb2600402396.redis.irstack.com'
+        host: 'localhost'
       , port: 6379
-      , auth: 'nodejitsudb2600402396.redis.irstack.com:f327cfe980c971946e80b8e975fbebb4'
     })
     app.set('port', 3000)
 

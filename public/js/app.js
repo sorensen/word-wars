@@ -16,13 +16,16 @@
   // Game Engine
   // ===========
 
-  function Game(socket, id) {
+  function Game(socket, id, autoSit) {
     var self = this
 
     this.socket = socket
     this.id = id
     this.listeners = []
     this.seats = {}
+    this.autoSit = autoSit
+    this.redWords = {}
+    this.blueWords = {}
 
     // Cache selectors
     this.$el = $('#battle-mode')
@@ -68,8 +71,8 @@
     this.words = {}
     this.players = {}
     this.pid = null
-    this.playerWords = {}
-    this.opponentWords = {}
+    this.redWords = {}
+    this.blueWords = {}
     this.seats = {}
     return this.disableInput()
   }
@@ -94,12 +97,14 @@
     , 'sat'
     , 'stood'
     , 'ready'
+    , 'over'
     ]
     this.socket.on('used',    function () { self.used.apply(self, arguments) })
+    this.socket.on('over',    function () { self.over.apply(self, arguments) })
     this.socket.on('attack',  function () { self.attacked.apply(self, arguments) })    
     this.socket.on('autoattack',  function () { self.attack.apply(self, arguments) })
     this.socket.on('players', function () { self.players.apply(self, arguments) })
-    this.socket.on('block',   function () { self.block.apply(self, arguments) })
+    this.socket.on('block',   function () { self.blocked.apply(self, arguments) })
     this.socket.on('won',     function () { self.won.apply(self, arguments) })
     this.socket.on('start',   function () { self.start.apply(self, arguments) })
     this.socket.on('sat',     function () { self.sat.apply(self, arguments) })
@@ -108,8 +113,20 @@
 
     this.send('join', this.id, function(e, room) {
       if (e) return
+
       self.id = room.id
       self.room = room
+
+      for (var i = 0; i !== room.players.length; i++) {
+        var player = room.players[i]
+        self.seats[player.seat] = player.id
+      }
+      self.updateSeats()
+      for (var i = 0; i !== room.players.length; i++) {
+        var player = room.players[i]
+        player.ready && self.playerReady(player.id)
+      }
+      self.autoSit && self.sit()
     })
     this.connected = true
     return this.updateSeats()
@@ -132,17 +149,15 @@
   Game.prototype.attacked = function(word, id) {
     word = word.toLowerCase().trim()
 
-    // var currentPlayer = !!id // for auto attacking
+    var $word = $('<div><p>' + word + '</p></div>')
+      , $el
 
-    var currentPlayer = (id === this.pid)
-
-    var $el = currentPlayer ? this.$blue : this.$red
-      , $word = $('<div><p>' + word + '</p></div>')
-
-    if (currentPlayer || this.getSeatByPlayer(id) === 'red') {
-      this.opponentWords[word] = $word
+    if (this.getSeatByPlayer(id) === 'red') {
+      $el = this.$blue
+      this.blueWords[word] = $word
     } else {
-      this.playerWords[word] = $word
+      $el = this.$red
+      this.redWords[word] = $word
     }
     this.animate($el, $word)
     return this
@@ -192,22 +207,25 @@
       })
     })
   }
-  Game.prototype.block = function(word, id) {
-    var me = id === this.pid
-      , idx
+  Game.prototype.blocked = function(word, id) {
+    var idx
 
     word = word.toLowerCase().trim()
 
-    if (me || this.getSeatByPlayer(id) === 'red') {
-      idx = this.playerWords[word].index()
-      this.playerWords[word].remove()
-      delete this.playerWords[word]
-      this.reStack(this.$red, idx)
+    if (this.getSeatByPlayer(id) === 'red') {
+      if (this.redWords[word]) {
+        idx = this.redWords[word].index()
+        this.redWords[word].remove()
+        delete this.redWords[word]
+        this.reStack(this.$red, idx)
+      }
     } else {
-      idx = this.opponentWords[word].index()
-      this.opponentWords[word].remove()
-      delete this.opponentWords[word]
-      this.reStack(this.$blue, idx)
+      if (this.blueWords[word]) {
+        idx = this.blueWords[word].index()
+        this.blueWords[word].remove()
+        delete this.blueWords[word]
+        this.reStack(this.$blue, idx)
+      }
     }
     return this
   }
@@ -218,6 +236,8 @@
       ? true
       : false
 
+    this.gameStarted = true
+
     this.$counter
       .show()
       .countdown({
@@ -227,7 +247,7 @@
       , digitImages: 6
       , digitWidth: 53
       , digitHeight: 77
-      , timerEnd: function() { 
+      , timerEnd: function() {
           self.$counter.html('').hide()
           self
             .clearBoard()
@@ -273,9 +293,13 @@
     return this
   }
   Game.prototype.over = function() {
+    if (this.gameStarted) {
 
+    }
+    this.gameStarted = false
     return this
       .clearBoard()
+      .disableInput()
       .updateSeats()
   }
   // Player has quit the game
@@ -297,6 +321,12 @@
   Game.prototype.sat = function(id, seat) {
     if (id === this.pid) {
       this.isSitting = true
+      if (this.getSeat(seat) === 'blue') {
+        this.$red = $('#blue-player .word-list')
+        this.$blue = $('#red-player .word-list')
+        this.$redSeat = $('#blue-seat')
+        this.$blueSeat = $('#red-seat')
+      }
     }
     this.seats[this.getSeat(seat)] = id
     return this.updateSeats()
@@ -427,20 +457,6 @@
     $('.word-list').html('')
     return this
   }
-  Game.prototype.stack = function() {
-    var self = this
-
-    ;[this.$red.children()
-    , this.$blue.children()
-    ].forEach(function($els) {
-      var len = $els.length
-
-      $els.each(function(key, val) {
-        self.word($(val), len - key - 1)
-      })
-    })
-    return this
-  }
   Game.prototype.attack = function(word) {
     var self = this
     if (!this.enabled) return
@@ -461,7 +477,13 @@
   }
   Game.prototype.highlight = function() {
     var val = this.$input.val()
-      , words = this.playerWords
+      , words
+
+    if (this.getSeatByPlayer(this.pid) === 'red') {
+      words = this.redWords
+    } else {
+      words = this.blueWords
+    }
 
     for (var word in words) {
       var $word = words[word]

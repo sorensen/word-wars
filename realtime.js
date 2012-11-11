@@ -20,15 +20,28 @@ var computer = {
   , length : 10
   , tick : function () {
       var me = this
-      Object.keys(me.rooms).forEach(function (room) {
-        io.sockets.in(room).emit('autoattack', me.word())
+        , rooms = Object.keys(me.rooms)
+
+      rooms.forEach(function (room) {
+        var key = [room, 'currentplayers'].join(':')
+
+        db.hkeys(key, gotUsers)
+
+        function gotUsers(err, users) {
+          var idx = getRandomInt(0, users.length)
+            , attacker = users[idx]
+            , defender = users[idx === 0 ? 1 : 0]
+          attack(room, me.word(), attacker, defender, function (err) {
+            if (err) gotUsers(null, users)
+          })
+        }
       })
   }
   , beginAutoAttack : function (id) { 
       this.rooms[id] = true
   } 
   , stopAutoAttack : function (id) { 
-      this.rooms[id] = null
+      delete this.rooms[id]
   }
   , word : function () {
     var randomWord = this.words[getRandomInt(0, this.words.length)]
@@ -47,19 +60,17 @@ function getRandomInt (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getSessionId (socketid) {
-  return io.sockets.manager.handshaken[socketid].session.id
-}
-
 function ioMain(socket) {
   var session = socket.handshake.session
 
-  io.sockets.sub.subscribe(session.id, io.sockets.in(session.id).emit.bind(io.sockets.in(session.id)))
-
-  // socket.join(session.id)
-
-  socket.on('getSession', function (socketid, cb) {
-    db.get('sess:' + getSessionId(socketid), cb)
+  socket.on('getSession', function (cb) {
+    db.get('sess:' + session.id, function (err, sess) {
+      sess = JSON.parse(sess)
+      var user = {
+        name : sess.name || 'anonymous'
+      }
+      cb(null, user)
+    })
   })
 
   socket.on('getScores', function (cb) {
@@ -74,11 +85,11 @@ function ioMain(socket) {
   })
 
   socket.on('setName', function (name, cb) {
-    db.get('sess:'+session.id, function (err, user) {
+    db.get('sess:' + session.id, function (err, user) {
       user = JSON.parse(user)
       user.name = name
-      db.set('sess:'+session.id, JSON.stringify(user), function (err) {
-        io.sockets.pub.publish(session.id, 'setName', cb)
+      db.set('sess:' + session.id, JSON.stringify(user), function (err) {
+        cb()
       })
     })
   })
@@ -127,24 +138,30 @@ function ioMain(socket) {
   })
 
   socket.on('leave', function (room, cb) {
-    console.log('LEAVE', room)
     socket.leave(room)
     stand(room, socket)
   })
 
   socket.on('sit', function (room, cb) {
     var key = [room, 'currentplayers'].join(':')
-      , first = false
-      , color
+      , color = 'red'
 
-    db.hlen(key, gotSitting)
+    db.hgetall(key, gotSitting)
 
-    function gotSitting(err, length) {
-      if (length >= 2) return cb('There are no seats left')
+    function gotSitting(err, players) {
+      if (players) {
+        var playerKeys = Object.keys(players)
+          , length = playerKeys.length
+          , playerColor
 
-      if (length === 0) first = true
+        if (players[socket.id]) return cb('You are already sitting')
 
-      color = first ? 'red' : 'blue'
+        if (length >= 2) return cb('There are no seats left')
+
+        playerColor = players[playerKeys[0]].split(':')[1]
+
+        color = playerColor === 'red' ? 'blue' : 'red'
+      }
 
       db.hset(key, socket.id, 'false:' + color, addedSitter)
     }
@@ -163,6 +180,7 @@ function ioMain(socket) {
     db.hgetall(key, getPlayers)
 
     function getPlayers(err, players) {
+      console.log(players)
       if (!players || !players[socket.id]) return cb('Not sitting in room')
 
       var playersReady = false
@@ -191,7 +209,6 @@ function ioMain(socket) {
 
     function setReady(err) {
       io.sockets.in(room).emit('ready', socket.id)
-      computer.beginAutoAttack(room)
       cb()
     }
   })
@@ -228,7 +245,7 @@ function ioMain(socket) {
         return cb('Invalid word')
       }
 
-      db.srem([room, 'currentwords'].join(':'), socket.id + word, checkPlayerWords)
+      db.srem([room, 'currentwords'].join(':'), socket.id + ':' + word, checkPlayerWords)
 
       function checkPlayerWords(err, res) {
         if (err) return cb('Error checking word')
@@ -238,37 +255,14 @@ function ioMain(socket) {
           return cb(null)
         }
 
-        db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+        attack(room, word, socket.id, otherPlayer, cb)
       }
 
-      function checkAllWords(err, res) {
-        if (err) return cb('Error checking word')
-
-        if (res === 0) {
-          return cb('Word was already played')
-        }
-
-        var key = [room, 'currentwords'].join(':')
-        db.multi()
-          .sadd(key, otherPlayer + word)
-          .scard(key, gotCount)
-          .exec()
-      }
-
-      function gotCount(err, length) {
-        if (length > 10) {
-          io.sockets.in(room).emit('won', socket.id)
-        } else {
-          io.sockets.in(room).emit('attack', word, socket.id)
-        }
-        cb(null)
-      }
     }
   })
 
   socket.on('disconnect', function () {
     var rooms = io.sockets.manager.roomClients[socket.id]
-    io.sockets.sub.unsubscribe(session.id)
     Object.keys(rooms).forEach(function (room) {
       if (room === '') return
       stand(room, socket)
@@ -276,7 +270,38 @@ function ioMain(socket) {
   })
 }
 
-function winLose(room) {
+function attack(room, word, attacker, defender, cb) {
+  db.sadd([room, 'playedwords'].join(':'), word, checkAllWords)
+
+  function checkAllWords(err, res) {
+    if (err) return cb('Error checking word')
+
+    if (res === 0) {
+      return cb('Word was already played')
+    }
+
+    var key = [room, 'currentwords'].join(':')
+    db.multi()
+      .sadd(key, defender + ':' + word)
+      .smembers(key, gotCount)
+      .exec()
+  }
+
+  function gotCount(err, words) {
+    words || (words = [])
+    var length = 0
+    words.forEach(function (word) {
+      word = word.split(':')
+      if (word[0] !== attacker) length += 1
+    })
+    if (length > 10) {
+      io.sockets.in(room).emit('won', attacker)
+      clearRoom(room)
+    } else {
+      io.sockets.in(room).emit('attack', word, attacker)
+    }
+    cb(null)
+  }
 }
 
 function getRoom(room, cb) {
@@ -363,7 +388,6 @@ function stand(room, socket, cb) {
 
   function removedSitting(err, res) {
     if (res === 0) return cb && cb('Not sitting in that room')
-    computer.stopAutoAttack(room)
     io.sockets.in(room).emit('stood', socket.id)
     clearRoom(room, socket)
     updateLobby()
@@ -390,10 +414,12 @@ function resetReady(room, cb) {
 
 function startGame(room) {
   io.sockets.in(room).emit('start')
+  computer.beginAutoAttack(room)
 }
 
 function endGame(room) {
   io.sockets.in(room).emit('over')
+  computer.stopAutoAttack(room)
 }
 
 function clearRoom(room) {

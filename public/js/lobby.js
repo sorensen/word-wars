@@ -35,15 +35,22 @@
 
     this.$el.on('click', '.join', function(e) {
       var $button = $(this)
-        , id = $button.parent().data('id')
+        , $parent = $button.parent()
+        , id = $parent.data('id')
 
-      self.join(id)
+      self.join(id, $parent)
     })
+    this.$el.on('click', '.play', function(e) {
+      var $button = $(this)
+        , $parent = $button.parent()
+        , id = $parent.data('id')
 
-    $('.lobby').on('click', '.join-room', function (e) {
-      self.join(false)
+      self.join(id, $parent, true)
     })
-    $('.lobby').on('click', '.create-room', function (e) {
+    this.$el.on('click', '.join-room', function (e) {
+      self.join(null, null, true)
+    })
+    this.$el.on('click', '.create-room', function (e) {
       //self.join(false)
     })
     this.socket = socket
@@ -59,10 +66,10 @@
   Lobby.prototype.connect = function() {
     var self = this
     this.Sessions = new Sessions().display()
-    this.HighScores = window.HighScores.display()
+    // this.HighScores = window.HighScores.display()
     self.getRooms()
     this.socket.on('updateLobby', function () {
-      self.HighScores.display()
+      // self.HighScores.display()
       self.getRooms()
     })  
     return this
@@ -70,8 +77,6 @@
   Lobby.prototype.getRooms = function() {
     var self = this
     this.socket.emit('getRooms', function (rooms) {
-      console.log('getRooms: ', JSON.stringify(rooms, null, 2))
-      // if (rooms.length === 0) return self
       self.$gameList.empty()
       rooms.forEach(function (room) {
         self.render(room)
@@ -82,8 +87,8 @@
     return this
   }
   // Join a game
-  Lobby.prototype.join = function(id) {
-    this.game = new Game(this.socket, id).connect()
+  Lobby.prototype.join = function(id, $el, autoSit) {
+    this.game = new Game(this.socket, id, autoSit).connect()
     this.$wrapper
       .removeClass('lobby')
       .addClass('battle')
@@ -100,16 +105,18 @@
   }
   Lobby.prototype.render = function(room) {
     var watchers = room.clients.length - room.players.length
-    
     watchers = watchers >= 0 ? watchers : 0
     
     var $html = $(views.roomBox({ 
-      room : room.id
-    , players : room.players
-    , watchers : watchers
-    , words : '80'
+      room: room.id
+    , players: room.players
+    , watchers: watchers
+    , words: '80'
     }))
-    console.log('render: ', $html, this.$gameList)
+
+    if (room.players.length >= 2) {
+      $html.find('.play').attr('disabled', 'disabled')
+    }
     this.$gameList.append($html)
     return this
   }
