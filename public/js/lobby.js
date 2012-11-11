@@ -26,6 +26,7 @@
     this.$wrapper = $('#wrapper')
     this.$home = $('#home')
     this.$el = $('.lobby-mode')
+    this.$fullscreen = $('#fullscreen')
 
     $win.unload(function() {
       self.game && self.game.quit()
@@ -49,6 +50,7 @@
     this.socket.on('connect', function() { 
       self.connect() 
     })
+    this.$fullscreen.click(function() { self.fullscreen() })
   }
   // Home screen
   Lobby.prototype.home = function() {
