@@ -68,6 +68,7 @@
     var self = this
 
     this.socket.emit('getRooms', function(rooms) {
+      console.log('getRooms: ', rooms)
       if (rooms.length === 0) return self
 
       rooms.forEach(function (room) {
@@ -168,12 +169,16 @@
       }
     })
     // Attack and clear input if enter pressed
-    this.$input.keypress(function(e) {
-      if (self.enabled && e.which === ENTER) {
-        self.attack(self.$input.val())
-        self.$input.val('')
-      }
-    })
+    this.$input
+      .keypress(function(e) {
+        if (self.enabled && e.which === ENTER) {
+          self.attack(self.$input.val())
+          self.$input.val('')
+        }
+      })
+      .keyup(function(e) {
+        self.highlight()
+      })
     this.$sit.click(function() { self.sit() })
     this.$stand.click(function() { self.stand() })
     return this
@@ -269,6 +274,7 @@
       , idx = $el.children().length
 
     this.word($word, idx)
+    $word.lettering()
     $el.prepend($word)
     return this
   }
@@ -314,9 +320,10 @@
       , digitHeight: 77
       , timerEnd: function() { 
           console.log('start game')
-          self.$counter
-            .html('')
-            .hide()
+          self.$counter.html('').hide()
+          self.$sit.hide()
+          self.$el.find('.player').hide()
+          self.$stand.hide()
           self.enableInput()
         }
       , image: imgPath
@@ -466,20 +473,6 @@
 
     return this
   }
-  Game.prototype.add = function(e) {
-    var $el = this.$input
-      , str = $el.val()
-
-    $el.val(str + getChar(e.which))
-    return this
-  }
-  Game.prototype.remove = function(e) {
-    var $el = this.$input
-      , str = $el.val()
-
-    $el.val(str.substr(0, str.length))
-    return this
-  }
   Game.prototype.stack = function() {
     var self = this
 
@@ -513,7 +506,23 @@
     return this
   }
   Game.prototype.highlight = function() {
+    var val = this.$input.val()
+      , words = this.playerWords
 
+    for (var word in words) {
+      var $word = words[word]
+        , children = $word.children()
+
+      // Reset word color
+      $word.find('span').css('color', '#000000')
+
+      // Part of input found in word
+      if (val.length && word.substring(0, val.length) === val) {
+        for (var i = 0; i !== children.length && i !== val.length; i++) {
+          $(children[i]).css('color', '#ff0000')
+        }
+      }
+    }
     return this
   }
 
