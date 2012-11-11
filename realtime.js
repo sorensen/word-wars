@@ -433,7 +433,7 @@ function startGame(room) {
   io.sockets.in(room).emit('start')
   setTimeout(function () {
     computer.beginAutoAttack(room)
-  }, 4 * 1000)]
+  }, 4 * 1000)
 }
 
 function endGame(room) {
