@@ -180,7 +180,10 @@
       duration: timeout
     , step: function (position) {
         var idx = $word.index() * 10
-        if (position > (90 - idx)) position = 90 - idx
+        if (position > (90 - idx)) {
+          position = 90 - idx
+          $word.data('bottom', true)
+        }
         $word.css({top: position + '%'})
       }
     })
@@ -193,6 +196,7 @@
         , start = 90 - wordIdx * 10
         , end   = start + 90
 
+      if (!$word.data('bottom')) return
       if (idx - 1 >= wordIdx) return
       $({
         position: start
