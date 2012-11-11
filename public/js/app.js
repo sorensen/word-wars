@@ -125,12 +125,10 @@
       for (var i = 0; i !== room.players.length; i++) {
         var player = room.players[i]
         self.seats[player.seat] = player.id
-      }
-      self.updateSeats()
-      for (var i = 0; i !== room.players.length; i++) {
-        var player = room.players[i]
         player.ready && self.playerReady(player.id)
       }
+      self.updateSeats()
+
       self.autoSit && self.sit()
     })
     this.connected = true
