@@ -223,7 +223,9 @@
 
     this.send('join', this.id, function(e, room) {
       if (e) return
-      self.id = room
+      self.id = room.id
+      self.room = room
+      console.log(room)
     })
     this.connected = true
     return this.updateSeats()
