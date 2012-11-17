@@ -2,35 +2,35 @@
 <html>
 <head>
   <title>Word Wars</title>
-  <link rel='stylesheet' href='/css/bootstrap.min.css'>
-  <link rel='stylesheet' href='/css/font-awesome.css'>
-  <link rel='stylesheet' href='/css/style.css'>
+  <link rel="stylesheet" href="/css/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/vendor/font-awesome.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div id='wrapper' class='lobby'>
-    <div id='top' class='color-strip'>
-      <div class='color-1'></div>
-      <div class='color-2'></div>
-      <div class='color-3'></div>
-      <div class='color-4'></div>
+  <div id="wrapper" class="lobby">
+    <div id="top" class="color-strip">
+      <div class="color-1"></div>
+      <div class="color-2"></div>
+      <div class="color-3"></div>
+      <div class="color-4"></div>
     </div>
 
-    <div id='header'>
-      <div id='logo'>word battle</div>
+    <div id="header">
+      <div id="logo">word battle</div>
 
-      <div id='notification'></div>
-      <a id='home' title='Home - Lobby' class='box icon icon-home'></a>
+      <div id="notification"></div>
+      <a id="home" title="Home - Lobby" class="box icon icon-home"></a>
       <iframe id="vote" src="http://nodeknockout.com/iframe/candy-wars" frameborder=0 scrolling=no allowtransparency=true width=115 height=25></iframe>
     </div>
-    <div id='inner'>
+    <div id="inner">
 
       <!-- Game lobby -->
-      <div id='lobby-mode'>
+      <div id="lobby-mode">
         <div id="game-list"></div>
         <div id="lobby-controls">
           <p>Improve your personal typing speed and compete head to head.</p>
-          <button title='Random Room' class='btn btn-info join-room'><i class="icon-bolt"></i> Play Now</button>
-          <button title='Private Room' class='btn btn-secondary private-room'><i class="icon-key"></i> Private Room</button>
+          <button title="Random Room" class="btn btn-info join-room"><i class="icon-bolt"></i> Play Now</button>
+          <button title="Private Room" class="btn btn-secondary private-room"><i class="icon-key"></i> Private Room</button>
         </div>
       </div>
       
@@ -40,6 +40,7 @@
         <div id="vs">VS</div>
         <div id="game" class="focus-">
           <a id="game-overlay" class="btn expand"><span></span></a>
+          
           <div class="board" id="red-player">
             <div class="player-name">
               <span></span>
@@ -71,40 +72,38 @@
 
     </div>
 
-    <div id='modal'>
-      <div id='modal-inner'></div>
-    </div>
+    <div id="modal"><div id="modal-inner"></div></div>
+    <div id="counter"></div>
 
-    <div id='counter'></div>
-
-    <div id='session-bar'>
-      <div class=''>
+    <div id="session-bar">
+      <div class="">
         <h4><i>???</i></h4>
       </div>
     </div>
 
-    <div id='bottom' class='color-strip'>
-      <div class='color-4'></div>
-      <div class='color-3'></div>
-      <div class='color-2'></div>
-      <div class='color-1'></div>
+    <div id="bottom" class="color-strip">
+      <div class="color-4"></div>
+      <div class="color-3"></div>
+      <div class="color-2"></div>
+      <div class="color-1"></div>
     </div>
 
   </div>
-  <script src="/js/es5-shim.min.js"></script>
+  <!-- Vendor libraries -->
+  <script src="/js/vendor/es5-shim.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/jquery-1.8.2.min.js"></script>
-  <script src="/js/jquery.ba-hashchange.min.js"></script>
-  <script src="/js/jquery-ui-1.9.1.custom.min.js"></script>
-  <script src="/js/jquery.countdown.js"></script>
-  <script src="/js/jquery.lettering-0.6.1.min.js"></script>
-  <script src="/js/bootstrap.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="/js/vendor/jquery-1.8.2.min.js"></script>
+  <script src="/js/vendor/jquery.ba-hashchange.min.js"></script>
+  <script src="/js/vendor/jquery-ui-1.9.1.custom.min.js"></script>
+  <script src="/js/vendor/jquery.countdown.js"></script>
+  <script src="/js/vendor/jquery.lettering-0.6.1.min.js"></script>
+  <script src="/js/vendor/bootstrap.min.js"></script>
   
-  <script src='/js/lobby.js'></script>
-  <script src='/js/highScores.js'></script>
-  <script src='/js/sessions.js'></script>
-  <script src='/bundle.views.js'></script>
+  <!-- Application libraries -->
+  <script src="/js/app.js"></script>
+  <script src="/js/lobby.js"></script>
+  <script src="/js/highScores.js"></script>
+  <script src="/js/sessions.js"></script>
+  <script src="/bundle.views.js"></script>
 </body> 
 </html>

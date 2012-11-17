@@ -1,33 +1,38 @@
-{
-  "name": "nko3-candy-wars",
-  "version": "0.0.1-11",
-  "description": "Words",
-  "main": "server.js",
-  "directories": {
+{ 
+  "name": "word-wars"
+, "version": "0.0.2"
+, "description": "Word Wars"
+, "main": "server.js"
+, "authors": [
+    "Beau Sorensen"
+  , "Tom Blobaum"
+  , "Jacob Chapel"
+  ]
+, "directories": {
     "test": "test"
-  },
-  "scripts": {
+  }
+, "scripts": {
     "start": "node server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:nko3/candy-wars.git"
-  },
-  "devDependencies": {
+  }
+, "repository": {
+    "type": "git"
+  , "url": "git@github.com:sorensen/candy-wars.git"
+  }
+, "devDependencies": {
     "rconsole": "~0.1.8"
-  },
-  "dependencies": {
-    "express": "~3.0.2",
-    "redis": "~0.8.2",
-    "connect-redis": "~1.4.5",
-    "connect": "~2.6.2",
-    "socket.io": "~0.9.11",
-    "ejs": "~0.8.3",
-    "cookie": "0.0.5",
-    "async": "~0.1.22"
-  },
-  "engines": {
+  }
+, "dependencies": {
+    "express": "~3.0.2"
+  , "redis": "~0.8.2"
+  , "connect-redis": "~1.4.5"
+  , "connect": "~2.6.2"
+  , "socket.io": "~0.9.11"
+  , "ejs": "~0.8.3"
+  , "cookie": "0.0.5"
+  , "async": "~0.1.22"
+  }
+, "engines": {
     "node": "0.8.x"
-  },
-  "subdomain": "candy-wars.nko3"
+  }
+, "subdomain": "word"
 }
