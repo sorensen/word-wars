@@ -1,52 +1,103 @@
 
 ;(function() {
-  'use strict'
+'use strict'
 
-  function Sess () {
-    var me = this
-    me.current = {}
+/**
+ * Client constructor.
+ *
+ * @param {Object} socket.io connection
+ */
 
-    me.$el.on('click', 'i', function (e) {
-      me.$el.html('<form><input type="text" class="input input-small" '
-        +' value="' + me.current.name + '" /></form>')
-      me.$el.find('form input').focus()
-    })
+function Session(socket) {
+  var self = this
+    , $el = this.$el = $('#current-user p')
 
-    me.$el.on('submit', function (e) {
-      e.preventDefault()
-      me.setName(me.current.name = me.$el.find('input').val())
-      return false
-    })
+  this.id = null
+  this.current = {}
+  this.sessions = {}
+  this.socket = socket
 
-    conn.on('setName', function () { console.log('setname emit') })
-  }
+  $el.on('click', 'i', function(e) {
+    $el
+      .html(''
+        + '<form>'
+        + '  <input type="text" class="input input-small" value="' + self.current.name + '" />'
+        + '</form>'
+      )
+      .find('form input')
+      .focus()
+  })
+  $el.on('submit', function(e) {
+    e.preventDefault()
+    self.setName(self.current.name = $el.find('input').val())
+    return false
+  })
+  this.socket.on('session', function() { self.gotSession.apply(self, arguments) })
+}
 
-  Sess.prototype = {
-      $el : $('#session-bar div h4')
-    , sessions : {}
-    , setName : function (name, cb) {
-        var me = this
-        conn.emit('setName', name, function (err) {
-          me.display()
-          cb && cb()
-        })
+/**
+ * Set session name
+ *
+ * @param {String} name
+ * @param {Function} callback
+ */
+
+Session.prototype.setName = function(name, next) {
+  var self = this
+  this.socket.emit('setName', name, function(err) {
+    self.display()
+    next && next()
+  })
+  return this
+}
+
+/**
+ * Get session data
+ *
+ * @param {Function} callback
+ */
+
+Session.prototype.getSession = function(next) {
+  var self = this
+  this.socket.emit('getSession', function(err, session) {
+    if (!err) {
+      self.gotSession(session)
+      next && next(session)
     }
-    , getSession : function (cb) {
-        var me = this
-        conn.emit('getSession', function (err, session) {
-          if (err) console.log(err)
-          cb(me.sessions[conn.socket.sessionid] = me.current = session)
-        })
-    }
-    , display : function () {
-        var me = this
-        this.getSession(function (session) {
-          if (!session.name) me.setName('anonymous')
-          else me.$el.html('<i>' + me.current.name || session.name + '</i> <small class="icon icon-edit"></small>')
-        })
-    }
-  }
+  })
+  return this
+}
 
-  window.Sessions = Sess
+/**
+ * Received session data from the server
+ *
+ * @param {Object} session data
+ */
 
-}).call(this)
+Session.prototype.gotSession = function(session) {
+  this.sessions[this.socket.socket.sessionid] = this.current = session
+  this.id = session.id
+  return this
+}
+
+/**
+ * Display session details
+ */
+
+Session.prototype.display = function() {
+  var self = this
+  this.getSession(function(session) {
+    session.name
+      ? self.$el.html('<i>' + self.current.name || session.name + '</i> <small class="icon icon-edit"></small>')
+      : self.setName('anonymous')
+  })
+  return this
+}
+
+/*!
+ * Module exports.
+ */
+
+this.Sessions = Session
+
+}).call(this);

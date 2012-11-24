@@ -164,19 +164,6 @@ html, body {
     letter-spacing: -1px;
     line-height: 50px;
   }
-  #home {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 26px;
-    text-align: center;
-    padding: 0;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    color: white;
-    text-shadow: 0 -1px 0 black;
-  }
   #vote {
     position: absolute;
     top: 12px;
@@ -249,36 +236,44 @@ html, body {
         padding-right: 45px !important;
       }
 
-
-#menu {
-  text-align: center;
+#current-user {
   position: absolute;
-  height: 65px;
-  bottom: 25px;
-  bottom: 0;
-  width: 400px;
-  left: 50%;
-  margin-left: -200px;
-  font-size: 45px;
-  z-index: 3;
+  right: 10px;
+  background: #DDD;
+  padding: 5px 25px 0;
+  border-bottom: 1px solid #C7C7C7;
+  background-color: #DDD;
+  background-repeat: repeat-x;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#EEE), to(#DDD));
+  background-image: -moz-linear-gradient(top, #EEE, #DDD);
+  background-image: -ms-linear-gradient(top, #EEE, #DDD);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #EEE), color-stop(100%, #DDD));
+  background-image: -webkit-linear-gradient(top, #EEE, #DDD);
+  background-image: -o-linear-gradient(top, #EEE, #DDD);
+  background-image: linear-gradient(top, #EEE, #DDD);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#dddddd', GradientType=0);
+  border-radius: 0 0 20px 20px;
+  -moz-border-radius: 0 0 20px 20px;
+-webkit-border-radius: 0 0 20px 20px;
 }
-  #menu a {
-    width: 45px;
-    height: 45px;
-    display: inline-block;
-    margin: 0;
-  }
-  #menu a:hover {
-    color: #003D52;
-  }
-  #menu a + a {
-    margin-left: 5px;
-  }
-  #menu a:hover {
-    margin-top: 0;
-    cursor: pointer;
-    text-decoration: none;
-  }
+#menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+ #menu a {
+  float: left;
+  font-size: 26px;
+  text-align: center;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  color: white;
+  text-shadow: 0 -1px 0 black;
+  margin-right: 5px;
+ }
 
 #footer {
   height: 24px;
@@ -339,83 +334,138 @@ html, body {
     #lobby-controls i {
       margin-right: 5px;
     }
-  #game-list {
-    overflow: hidden;
-    overflow-y: auto;
+  #chat {
     position: absolute;
     left: 0;
-    right: 0;
-    top: 55px;
+    right: 200px;
     bottom: 0;
+    top: 50%;
+    background: #d0d0d0;
+    border-radius: 5px;
   }
-
-.game {
-  padding: 5px;
-  position: relative;
-  width: 200px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -ms-border-radius: 5px;
-  -o-border-radius: 5px;
-  border-radius: 5px;
-  background: #CCC;
-  margin: 10px;
-  float: left;
-  font-size: 14px;
-  line-height: 27px;
-
-  border: 1px solid #aaaaaa;
-  background-color: #aaaaaa;
-  background-image: -webkit-gradient(linear, top, bottom, from(#cccccc), to(#aaaaaa));
-  background-image: -webkit-linear-gradient(top, #cccccc, #aaaaaa);
-  background-image: -moz-linear-gradient(top, #cccccc, #aaaaaa);
-  background-image: -o-linear-gradient(top, #cccccc, #aaaaaa);
-  background-image: linear-gradient(to bottom, #cccccc, #aaaaaa);
-}
-  .game div {
-  }
-  .game div strong {
-    font-size: 14px;
-    font-weight: bold;
-    width: 40px;
-    text-align: right;
-    display: inline-block;
-    margin-right: 10px;
-  }
-  .game .watchers {
-    position: absolute;
-    top: 7px;
-    right: 8px;
-    height: 25px;
-    min-width: 8px;
-    line-height: 26px;
-    background: #7C7C7C;
-    padding: 0 8px;
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    font-size: 15px;
-    -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
-    -moz-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.8);
-    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
-    color: white;
-    font-weight: bold;
-    text-align: center;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
-  }
-  .game .controls {
-    margin-top: 5px;
-  }
-    .game .controls button {
-      width: 48.9999%;
-      height: 40px;
-      font-size: 16px;
-      font-weight: bold;
+    #chat-messages {
+      overflow: hidden;
+      overflow-y: scroll;
+      position: absolute;
+      top: 45px;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      background: white;
+      border: 1px solid #AAA;
     }
-  .game .open-slot {
-    font-style: italic;
-    color: #444;
+    #wrapper #chat-input {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      margin: 0;
+      padding: 2px;
+      bottom: auto;
+    }
+      #wrapper #chat-input input {
+        height: 30px;
+        text-align: left;
+        padding: 3px 5px;
+        font-size: 18px;
+        line-height: 30px;
+      }
+  #player-list {
+    position: absolute;
+    right: 0;
+    width: 195px;
+    top: 50%;
+    bottom: 0;
+    background: #DDD;
+    border-radius: 3px;
   }
+  #player-list div {
+    background: #ffffff;
+    margin: 4px;
+    border-radius: 2px;
+    padding: 2px 6px;
+    cursor: pointer;
+  }
+
+#game-list {
+  overflow: hidden;
+  overflow-y: auto;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 51%;
+  background: #cfcfcf;
+  border-radius: 5px;
+  padding: 5px;
+}
+  .game {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+
+    height: 25px;
+    line-height: 25px;
+    overflow: hidden;
+    position: relative;
+
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    background-image: -webkit-gradient(linear, top, bottom, from(#cccccc), to(#aaaaaa));
+    background-image: -webkit-linear-gradient(top, #cccccc, #aaaaaa);
+    background-image: -moz-linear-gradient(top, #cccccc, #aaaaaa);
+    background-image: -o-linear-gradient(top, #cccccc, #aaaaaa);
+    background-image: linear-gradient(to bottom, #cccccc, #aaaaaa);
+    background: #ffffff;
+  }
+    .game div {
+      float: left;
+    }
+    .game div strong {
+      font-size: 14px;
+      font-weight: bold;
+      width: 40px;
+      text-align: right;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .game .watchers {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 25px;
+      min-width: 8px;
+      line-height: 26px;
+      background: #7C7C7C;
+      padding: 0 8px;
+      -webkit-border-radius: 15px;
+      -moz-border-radius: 15px;
+      border-radius: 15px;
+      font-size: 15px;
+      -webkit-box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+      -moz-box-shadow: inset 1px 1px 0 rgba(0,0,0,0.8);
+      box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.8);
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.8);
+    }
+    .game .controls {
+      margin-left: 35px;
+    }
+      .game .controls button {
+        height: 40px;
+        font-size: 12px;
+        line-height: 12px;
+        height: 24px;
+        font-weight: bold;
+      }
+    .game .open-slot {
+      font-style: italic;
+      color: #444;
+    }
 
 /* =============================================================================
    Game
@@ -556,7 +606,7 @@ html, body {
     width: 29.5%;
     font-size: 16px;
   }
-  #input-wrapper {
+  #wrapper .input-wrapper {
     margin: 10px;
     bottom: 0;
     position: absolute;
@@ -580,7 +630,7 @@ html, body {
 
     background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #aaaaaa));
   }
-  #input {
+  #wrapper .input {
     text-align: center;
     margin: 0;
     width: 100%;

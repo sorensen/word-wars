@@ -19,19 +19,27 @@
       <div id="logo">word battle</div>
 
       <div id="notification"></div>
-      <a id="home" title="Home - Lobby" class="box icon icon-home"></a>
-      <iframe id="vote" src="http://nodeknockout.com/iframe/candy-wars" frameborder=0 scrolling=no allowtransparency=true width=115 height=25></iframe>
+      <div id="menu">
+        <a id="home" title="Home - Lobby" class="box icon icon-home"></a>
+        <a id="auto-play" title="Play Now" class="box icon icon-bolt"></a>
+        <a id="create-private-room" title="Private Room" class="box icon icon-key"></a>
+      </div>
+    </div>
+    <div id="current-user">
+      <p></p>
     </div>
     <div id="inner">
 
       <!-- Game lobby -->
       <div id="lobby-mode">
         <div id="game-list"></div>
-        <div id="lobby-controls">
-          <p>Improve your personal typing speed and compete head to head.</p>
-          <button title="Random Room" class="btn btn-info join-room"><i class="icon-bolt"></i> Play Now</button>
-          <button title="Private Room" class="btn btn-secondary private-room"><i class="icon-key"></i> Private Room</button>
+        <div id="chat">
+          <div id="chat-input" class="input-wrapper">
+            <input type="text" class="input" />
+          </div>
+          <div id="chat-messages"></div>
         </div>
+        <div id="player-list"></div>
       </div>
       
       <!-- Word battle screen -->
@@ -64,8 +72,8 @@
             <div id="is-ready-overlay" class="overlay btn expand"><span>Ready</span></div>
           </div>
 
-          <div id="input-wrapper">
-            <input id="input" disabled="disabled" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
+          <div id="game-input-wrapper" class="input-wrapper">
+            <input id="game-input" class="input" disabled="disabled" autocomplete="off" autofocus="autofocus" placeholder="Attack!" type="text" />
           </div>
         </div>
       </div>
@@ -75,19 +83,12 @@
     <div id="modal"><div id="modal-inner"></div></div>
     <div id="counter"></div>
 
-    <div id="session-bar">
-      <div class="">
-        <h4><i>???</i></h4>
-      </div>
-    </div>
-
     <div id="bottom" class="color-strip">
       <div class="color-4"></div>
       <div class="color-3"></div>
       <div class="color-2"></div>
       <div class="color-1"></div>
     </div>
-
   </div>
   <!-- Vendor libraries -->
   <script src="/js/vendor/es5-shim.min.js"></script>
@@ -100,10 +101,11 @@
   <script src="/js/vendor/bootstrap.min.js"></script>
   
   <!-- Application libraries -->
-  <script src="/js/app.js"></script>
-  <script src="/js/lobby.js"></script>
-  <script src="/js/highScores.js"></script>
-  <script src="/js/sessions.js"></script>
   <script src="/bundle.views.js"></script>
+  <script src="/js/proxy.js"></script>
+  <script src="/js/game.js"></script>
+  <script src="/js/lobby.js"></script>
+  <script src="/js/scores.js"></script>
+  <script src="/js/sessions.js"></script>
 </body> 
 </html>

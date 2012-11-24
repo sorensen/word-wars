@@ -1,25 +1,27 @@
-<div class='game' data-id="<%= room %>">
-  <div class='red-player'>
-    <strong>Red:</strong> <span>
-    <% if (players[0]) { %>
-      <%= getPlayerName(players[0].id) %>
-    <% } else { %>
-      <span class='open-slot'>Open</span>
-    <% } %>
-  </span>
+<div class="game" data-id="<%= room %>">
+  <div class="watchers" title="Users in Game"><span><%= watchers %></span></div>
+  <div class="controls">
+    <button title="<%= room %>" class="play btn btn">Play</button>
+    <button title="<%= room %>" class="join btn btn">Watch</button>
   </div>
-  <div class='blue-player'>
-    <strong>Blue:</strong> <span>
-    <% if (players[1]) { %>
-      <%= getPlayerName(players[1].id) %>
-    <% } else { %>
-      <span class='open-slot'>Open</span>
-    <% } %>
+  <div class="red-player">
+    <strong>Red:</strong> 
+    <span>
+      <% if (players.red) { %>
+        <%= players.red.name %>
+      <% } else { %>
+        <span class="open-slot">Open</span>
+      <% } %>
     </span>
   </div>
-  <div class='watchers' title='Users in Game'><span><%= watchers %></span></div>
-  <div class='controls'>
-    <button title='<%= room %>' class='play btn btn'>Play</button>
-    <button title='<%= room %>' class='join btn btn'>Watch</button>
+  <div class="blue-player">
+    <strong>Blue:</strong>
+    <span>
+      <% if (players.blue) { %>
+        <%= players.blue.name %>
+      <% } else { %>
+        <span class="open-slot">Open</span>
+      <% } %>
+    </span>
   </div>
 </div>

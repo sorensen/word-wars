@@ -1,157 +1,406 @@
 
 ;(function() {
-  'use strict'
+'use strict'
 
-  window.players = {}
+/*!
+ * Module dependencies
+ */
 
-  window.getPlayerName = function(pid) {
-    return window.players[pid] || 'anonymous'
-  }
+var root = this
+  , $win = $(this)
+  , toString = Object.prototype.toString
+  , ENTER = 13
 
-  var $doc = $(document)
-    , $win = $(window)
-    , $body = $('body')
-    , getChar = String.fromCharCode
-    , concat = Array.prototype.concat
-    , speed = 5
-    , current
-    , ENTER = 13
-    , DELETE = 8
-    , imgPath = '/img/digits.png'
+/**
+ * Lobby constructor
+ *
+ * @param {Object} socket connection
+ */
 
+function Lobby(socket) {
+  var self = this
+  this.game = null
+  this.socket = socket
+  this.players = {}
 
-  // Game Lobby
-  // ==========
+  // Cache selectors
+  this.$wrapper = $('#wrapper')
+  this.$home = $('#home')
+  this.$el = $('#lobby-mode')
+  this.$gameList = $('#game-list')
+  this.$playerList = $('#player-list')
+  this.$chatInput = $('#chat-input input')
+  this.$messageList = $('#chat-messages')
+  this.$notification = $('#notification')
 
-  function Lobby(socket) {
-    var self = this
+  $win.unload(function() { self.game && self.game.quit() })
+  this.$home.click(function() { self.home() })
 
-    this.game = null
+  this.$wrapper
+    .on('click', '.watch', function() { self.watchRoom(this) })
+    .on('click', '.play', function() { self.playRoom(this) })
+    .on('click', '#auto-play', function() { self.autoPlay(this) })
+    .on('click', '#create-private-room', function() { self.createPrivateRoom(this) })
 
-    // Cache selectors
-    this.$wrapper = $('#wrapper')
-    this.$home = $('#home')
-    this.$el = $('#lobby-mode')
-    this.$gameList = $('#game-list')
-
-    $win.unload(function() {
-      self.game && self.game.quit()
-    })
-    this.$home.click(function() { self.home() })
-
-    this.$el.on('click', '.join', function(e) {
-      var $button = $(this)
-        , $parent = $button.parent().parent()
-        , id = $parent.data('id')
-
-      self.join(id, $parent)
-    })
-    this.$el.on('click', '.play', function(e) {
-      var $button = $(this)
-        , $parent = $button.parent().parent()
-        , id = $parent.data('id')
-
-      self.join(id, $parent, true)
-    })
-    this.$el.on('click', '.join-room', function (e) {
-      self.join(null, null, true)
-    })
-    this.$el.on('click', '.private-room', function (e) {
-      self.join(null, null, true, true)
-    })
-    this.socket = socket
-    this.socket.on('connect', function() {
-      self.connect()
-    })
-    $win.hashchange(function () {
-      if (window.location.hash && window.location.hash.length > 1) {
-        self.join(window.location.hash.split('#')[1])
+  this.$chatInput
+    .keypress(function(e) {
+      var $el = $(this)
+      if (e.which === ENTER) {
+        self.sendMessage($el.val())
+        $el.val('')
       }
     })
-  }
-  // Home screen
-  Lobby.prototype.home = function() {
-    this.leave()
-  }
-  // Socket connection handler
-  Lobby.prototype.connect = function() {
-    var self = this
-    this.Sessions = new Sessions().display()
 
-    $win.hashchange()
+  this.proxies = {
+    connect: 'connect'
+  , players: 'updatePlayers'
+  , rooms: 'updateRooms'
+  , message: 'addMessage'
+  }
+  Proxy.setup(this, this.proxies, this.socket)
+  $win.hashchange(function() {
+    if (!self.game && window.location.hash && window.location.hash.length > 1) {
+      self._join(window.location.hash.split('#')[1])
+    }
+  })
+}
 
-    // this.HighScores = window.HighScores.display()
-    this.socket.emit('getPlayers', function(players) {
-      window.players = players
-      self.getRooms()
-    })
-    this.socket.on('updateLobby', function (rooms) {
-      // self.HighScores.display()
-      self.$gameList.empty()
-      rooms.forEach(function (room) {
-        self.render(room)
-      })
-    })
-    this.socket.on('players', function(players) {
-      window.players = players
-    })
-    return this
+/**
+ * Send event and data to the server
+ */
+
+Lobby.prototype.send = function() {
+  console.log('lobby send: ', arguments)
+  this.socket.emit.apply(this.socket, arguments)
+  return this
+}
+
+/**
+ * Return to home screen
+ */
+
+Lobby.prototype.home = function() {
+  return this.leave()
+}
+
+/**
+ * Socket connection handler
+ */
+
+Lobby.prototype.connect = function() {
+  var self = this
+  this.Sessions = new Sessions(this.socket).display()
+  this.Scores = new Scores(this.socket).display()
+  $win.hashchange()
+  return this.getAllPlayers()
+}
+
+/**
+ * Display notification message
+ */
+
+Lobby.prototype.notify = function(msg) {
+  this.$notification
+    .show()
+    .html(msg)
+    .delay(6000)
+    .fadeOut(2000)
+  return this
+}
+
+/**
+ * Join a room 
+ *
+ * @param {String} room id
+ * @param {Object} [options]
+ * @api private
+ */
+
+Lobby.prototype._join = function(id, options) {
+  var self = this
+    , event = 'play'
+    , flag = id
+
+  options || (options = {})
+  if (this.game) {
+    return this.notify('You are already in a game')
   }
-  Lobby.prototype.getRooms = function() {
-    var self = this
-    this.socket.emit('getRooms', function (rooms) {
-      self.$gameList.empty()
-      rooms.forEach(function (room) {
-        self.render(room)
-      })
-    })  
+  !options.autoSit && (event = 'watch')
+  options.autoPlay && (event = 'auto')
+
+  if (options.create) {
+    event = 'create'
+    flag = options.isPrivate
   }
-  Lobby.prototype.games = function() {
-    return this
-  }
-  // Join a game
-  Lobby.prototype.join = function(id, $el, autoSit, priv) {
-    if (this.game) return
-    this.game = new Game(this.socket, id, autoSit, priv).connect()
-    this.$wrapper
+  this.send(event, flag, function(err, room) {
+    if (err) return self.notify(err).home()
+    
+    options.room = room
+    self.game = new Game(self.socket, room.id, self.Sessions.id, options).connect()
+    self.game.lobby = this
+
+    if (window.location.hash !== room.id) {
+      window.location.hash = room.id
+    }
+    self.$wrapper
       .removeClass('lobby')
       .addClass('battle')
-    return this
-  }
-  // Leave the game
-  Lobby.prototype.leave = function() {
-    window.location.hash = ''
-    this.game && this.game.quit()
-    this.game = null
-    this.$wrapper
-      .removeClass('battle')
-      .addClass('lobby')
-    return this
-  }
-  Lobby.prototype.render = function(room) {
-    var watchers = room.clients.length - room.players.length
-    watchers = watchers >= 0 ? watchers : 0
-    
-    var $html = $(views.roomBox({ 
-      room: room.id
-    , players: room.players
-    , watchers: watchers
-    , words: '80'
-    }))
-
-    if (room.players.length >= 2) {
-      $html.find('.play').attr('disabled', 'disabled')
-    }
-    this.$gameList.append($html)
-    return this
-  }
-  Lobby.prototype.refresh = function() {
-    return this
-  }
-
-  $(function() {
-    window.conn  = io.connect()
-    window.lobby = new Lobby(window.conn)
   })
+  return this
+}
 
-}).call(this)
+/**
+ * Auto join an open room or create a new one
+ */
+
+Lobby.prototype.autoPlay = function() {
+  return this._join(null, {
+    autoPlay: true
+  })
+}
+
+/**
+ * Create a private room
+ */
+
+Lobby.prototype.createPrivateRoom = function() {
+  return this._join(null, {
+    autoSit: true
+  , create: true
+  , isPrivate: true
+  })
+}
+
+/**
+ * Play in target room, automatically sit down in open seat
+ *
+ * @param {Object} dom element
+ */
+
+Lobby.prototype.playRoom = function(el) {
+  var $button = $(el)
+    , $parent = $button.parent().parent()
+    , id = $parent.data('id')
+
+  return this._join(id, {
+    autoSit: true
+  })
+}
+
+/**
+ * Watch in target room
+ *
+ * @param {Object} dom element
+ */
+
+Lobby.prototype.watchRoom = function(el) {
+  var $button = $(el)
+    , $parent = $button.parent().parent()
+    , id = $parent.data('id')
+
+  return this._join(id)
+}
+
+/**
+ * Update connected players hash
+ *
+ * @param {Object} player id name mapping
+ */
+
+Lobby.prototype.updatePlayers = function(players) {
+  this.players = players
+  return this.renderPlayers()
+}
+
+/**
+ * Get active players from the server
+ */
+
+Lobby.prototype.getAllPlayers = function() {
+  var self = this
+  this.send('getPlayers', function(players) {
+    self
+      .updatePlayers(player)
+      .getRooms()
+  })
+  return this
+}
+
+Lobby.prototype.renderPlayers = function() {
+  var self = this
+    , $el = this.$playerList
+
+  $el.empty()
+  for (var id in this.players) {
+    var player = this.players[id]
+    $el.prepend(''
+      + '<div class="" id="player-' + player.id + '">' 
+      + player.name 
+      + '</div>'
+    )
+  }
+  return this
+}
+
+/**
+ * Get player
+ *
+ * @param {String} player id
+ * @return {Object} player
+ */
+
+Lobby.prototype.getPlayer = function(pid) {
+  return this.players[pid] || {}
+}
+
+/**
+ * Get players with seats as key
+ * 
+ * @return {Object} seat player map
+ */
+
+Lobby.prototype.getPlayersBySeat = function(room) {
+  var data = {}
+  for (var id in room.players) {
+    var player = room.players[id]
+    data[player.seat] = player
+  }
+  return data
+}
+
+/**
+ * Get player name
+ *
+ * @param {String} player id
+ * @return {String} player name
+ */
+
+Lobby.prototype.getPlayerName = function(pid) {
+  return this.getPlayer(pid).name || 'anonymous'
+}
+
+/**
+ * Render all current rooms
+ *
+ * @param {Array|Object} room objects
+ */
+
+Lobby.prototype._renderAllRooms = function(rooms) {
+  rooms || (rooms = [])
+  // Check for single room instance
+  if (toString.call(rooms) === '[object Object]') {
+    return this.render(rooms)
+  }
+  // Array of rooms assumed
+  this.$gameList.empty()
+  for (var i = 0; i !== rooms.length; i++) {
+    this.render(rooms[i])
+  }
+  return this
+}
+
+/**
+ * Update the lobby with all rooms
+ *
+ * @param {Array} room objects
+ */
+
+Lobby.prototype.updateRooms = function(rooms) {
+  return this._renderAllRooms(rooms)
+}
+
+/**
+ * Get and render all available rooms
+ */
+
+Lobby.prototype.getRooms = function() {
+  var self = this
+  this.send('getRooms', function(rooms) {
+    self._renderAllRooms(rooms)
+  })
+  return this
+}
+
+/**
+ * Leave current game
+ */
+
+Lobby.prototype.leave = function() {
+  window.location.hash = ''
+  this.game && this.game.quit()
+  this.game = null
+  this.$wrapper
+    .removeClass('battle')
+    .addClass('lobby')
+  return this
+}
+
+Lobby.prototype.objectToArray = function(objects) {
+  var data = []
+  for (var id in objects) {
+    data.push(objects[id])
+  }
+  return data
+}
+
+/**
+ * Render room 
+ *
+ * @param {Room} room instance
+ */
+
+Lobby.prototype.render = function(room) {
+  var playerLen = Object.keys(room.players).length
+    , watcherLen = Object.keys(room.watchers).length
+    , watchers = Math.max(watcherLen - playerLen, 0)
+    , $html
+
+  $html = $(views.roomBox({ 
+    room: room.id
+  , players: this.getPlayersBySeat(room)
+  , watchers: watchers
+  , words: '80'
+  }))
+  if (playerLen >= 2) {
+    $html.find('.play').attr('disabled', 'disabled')
+  }
+  this.$gameList.append($html)
+  return this
+}
+
+/**
+ * Render a message received from the server
+ *
+ * @param {Object} player
+ * @param {String} message
+ */
+
+Lobby.prototype.addMessage = function(player, msg) {
+  player || (player = {})
+  this.$messageList.append(''
+    + '<div data-player-id="' + player.id + '">'
+    + '  <strong>' + player.name + '</strong>'
+    + '  <span>' + msg + '</span>'
+    + '</div>'
+  )
+}
+
+/**
+ * Send a chat message
+ *
+ * @param {String} message
+ */
+
+Lobby.prototype.sendMessage = function(msg) {
+  return this.send('message', msg)
+}
+
+/*!
+ * Document ready
+ */
+
+$(function() {
+  root.lobby = new Lobby(window.conn = io.connect())
+})
+
+}).call(this);

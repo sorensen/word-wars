@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 var express = require('express')
   , app = express()
+  , repl = require('repl')
   , server = require('http').createServer(app)
   , connect = require('connect')
   , cookie = require('cookie')
@@ -96,6 +97,22 @@ io.configure(function () {
 app.set('server', server)
 app.set('engine', new Engine(app.settings.db, app.settings.io))
 require('./pages')(app)
+
+/*!
+ * Start REPL
+ */
+
+if (process.argv[2] === 'repl') {
+  input = repl.start({
+    prompt: ">>> "
+  , input: process.stdin
+  , output: process.stdout
+  , useColors: true
+  , useGlobal: true
+  })
+  // Set local context of REPL
+  input.context.engine = app.settings.engine
+}
 
 /*!
  * Start server
