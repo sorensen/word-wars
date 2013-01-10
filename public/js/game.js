@@ -11,6 +11,7 @@ var root = this
   , ENTER = 13
   , DELETE = 8
   , imgPath = '/img/digits.png'
+  , MINUTE = 60 * 1000
 
 /**
  * Game constructor
@@ -41,6 +42,7 @@ function Game(socket, id, pid, options) {
   this.watchers = room.watchers || {}
   this.playedWords = room.playedWords || {}
   this.currentWords = room.currentWords || {}
+  this.wordsPlayed = 0
 
   // Socket event to method mapping
   this.proxies = {
@@ -441,10 +443,25 @@ Game.prototype.start = function() {
         self.$counter.html('').hide()
         self.clearBoard()
         self.enableInput()
+        self.startTime = new Date().getTime()
       }
     , image: imgPath
     })
   return this
+}
+
+/**
+ * Get current words per minute
+ *
+ * @param {Object} player
+ */
+
+Game.prototype.getWPM = function(player) {
+  if (!this.startTime) {
+    return 0
+  }
+  var time = (new Date().getTime() - this.startTime) / MINUTE
+  return Math.round(this.wordsPlayed / time)
 }
 
 /**
@@ -491,6 +508,8 @@ Game.prototype.over = function() {
   }
   $('.player-name').hide()
   this.gameStarted = false
+  this.wordsPlayed = 0
+  this.startTime = null
   return this
     .clearBoard()
     .disableInput()
@@ -751,6 +770,7 @@ Game.prototype.clearBoard = function() {
 Game.prototype.sendWord = function(word) {
   var self = this
   if (!this.enabled) return
+  this.wordsPlayed += 1
   this.send('sendWord', word, function(err) {
     if (err) {
       return self.notify(err)

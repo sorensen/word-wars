@@ -383,6 +383,14 @@ Lobby.prototype.addMessage = function(player, msg) {
     + '  <span>' + msg + '</span>'
     + '</div>'
   )
+  var pos = this.$messageList.height() + this.$messageList.scrollTop()
+    , height = this.$messageList[0].scrollHeight
+
+  if (pos + 300 >= height) {
+    this.$messageList.stop().animate({
+      scrollTop: height
+    }, 200, 'easeInExpo')
+  }
 }
 
 /**

@@ -40,7 +40,7 @@ app.configure(function () {
   app.set('db', redis.createClient(app.settings.redis.port, app.settings.redis.host))
   app.settings.db.auth(app.settings.redis.auth)
   app.set('sessionStore', new RedisStore({client: app.settings.db}))
-  app.set('sessionSecret', 'IvIVKmFkjE!!a3fP6C38%m%C0%n094bpGnn73GrJU5$oET6!tI^a4pmFs7X3!Ue^')
+  app.set('sessionSecret', app.settings.session.secret)
   app.use(express.bodyParser())
   app.use(express.methodOverride())
   app.use(express.cookieParser())
@@ -95,7 +95,7 @@ io.configure(function () {
 })
 
 app.set('server', server)
-app.set('engine', new Engine(app.settings.db, app.settings.io))
+app.set('engine', new (Engine(app.settings.db, app.settings.io))())
 require('./pages')(app)
 
 /*!
